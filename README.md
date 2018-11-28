@@ -1,11 +1,17 @@
-# !!!!!!!! NOT-READY-for-Public-Consumption Yet - in testing mode !!!!!!!!!!
-
+# !!!!!!!! --- BETA testing mode --- !!!!!!!!!!
+# !!!!!!!! --- NOT-READY-for-Public-Consumption Yet --- !!!!!!!!!!
 # BlazeGraph Server 2.1.4 + Java 8 (1.8.0_191) JDK + Maven 3.5 + Python 3.5 +  Gradle 4.9
 [![](https://images.microbadger.com/badges/image/openkbs/blazegraph-docker.svg)](https://microbadger.com/images/openkbs/blazegraph-docker "Get your own image badge on microbadger.com") [![](https://images.microbadger.com/badges/version/openkbs/blazegraph-docker.svg)](https://microbadger.com/images/openkbs/blazegraph-docker "Get your own version badge on microbadger.com")
 
 # License Agreement
 By using this image, you agree the [Oracle Java JDK License](http://www.oracle.com/technetwork/java/javase/terms/license/index.html).
 This image contains [Oracle JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html). You must accept the [Oracle Binary Code License Agreement for Java SE](http://www.oracle.com/technetwork/java/javase/terms/license/index.html) to use this image.
+
+# Security
+* Non-root user for container:
+  We are tightening down the security of containerfor this container, we use non-root user (blzg as user) to run the Blazegraph. 
+* Though, currently, you can go into container to use "sudo" to do admin work. 
+  For production deployment,we will remove sudo access inside container and other vulnerability codes. At this point, we are still relative relaxing in not fully lock down security yet.
 
 # Components
 * [BlazeGraph](https://www.blazegraph.com/) 2.1.4 service will be running at http://<server_ip:9999>/
@@ -15,7 +21,6 @@ This image contains [Oracle JDK 8](http://www.oracle.com/technetwork/java/javase
 * Apache Maven 3.5.3
 * Python 3.5.2
 * Other tools: git wget unzip vim python python-setuptools python-dev python-numpy 
-* X11 display desktop
 
 # Run (recommended for easy-start)
 Image is pulling from openkbs/netbeans
@@ -28,6 +33,18 @@ Welcome to the Blazegraph(tm) Database.
 Go to http://172.17.0.3:9999/blazegraph/ to get started.
 ```
 
+# Demo
+To demonstrate the Blazegraph with FreeText Search capability as powerful combination with RDF/Sparql query/search, you can load the "Hello.rdf" using the following steps
+```
+click [UPDATE] tab 
+    -> select [Choose File] button at lower-left corner
+        -> pick "blazegraph-docker/rdf-samples" from the pop-up file chooser, then click OK/done
+    -> click [Update] button at the lower center of the screen.
+... You will see it is loading up the Hello.rdf file into Blazegraph database.
+click upper-right corner [SEARCH], then type "web" then return key or hit magnify lens icon.
+... You will see it returns one tuple of "www.w3schools.com" with subject.
+... Congratulation! You have successfully launched, loaded, and tested the powerful RDF/FreeText Search Engine/Database - "Blazegraph"!
+```
 # Deployment
 **Kubernetes / Minikube**: Tested Ok: 
 ```
@@ -63,7 +80,7 @@ Then, running "**./run.sh**" will use the "docker.env" file's entry (as above) t
 ```
 # Distributed Data Persistence
 * Currently, we are working on the distributed data/file persistence solution using such as Gluster, Lustre, BeeGFS, etc. However, before we provide the cluster-enabled distributed persistence implementation, please use the above host-based volume mapping solution.
-* When deploying to OpenShift, Mesos, DC/OS, etc., you can use "envrionment parameter to further to create your own host-based file mapping.
+* When deploying to OpenShift, Mesos, DC/OS, etc., you can use "envrionment parameter to create your own host-based file mapping instead of default.
 
 # Build
 You can build your own image locally.
