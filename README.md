@@ -15,7 +15,6 @@ This image contains [Oracle JDK 8](http://www.oracle.com/technetwork/java/javase
 * Apache Maven 3.5.3
 * Python 3.5.2
 * Other tools: git wget unzip vim python python-setuptools python-dev python-numpy 
-* X11 display desktop
 
 # Run (recommended for easy-start)
 Image is pulling from openkbs/netbeans
