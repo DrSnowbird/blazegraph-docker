@@ -1,7 +1,7 @@
 # !!!!!!!! NOT-READY-for-Public-Consumption Yet - in testing mode !!!!!!!!!!
 
-# BlazeGraph Server 2.1.4 + Java 8 (1.8.0_191) JDK + Maven 3.5 + Python 3.5 +  Gradle 4.9 + X11 (display GUI)
-[![](https://images.microbadger.com/badges/image/openkbs/jdk-mvn-py3-x11.svg)](https://microbadger.com/images/openkbs/blazegraph-docker "Get your own image badge on microbadger.com") [![](https://images.microbadger.com/badges/version/openkbs/blazegraph-docker.svg)](https://microbadger.com/images/openkbs/blazegraph-docker "Get your own version badge on microbadger.com")
+# BlazeGraph Server 2.1.4 + Java 8 (1.8.0_191) JDK + Maven 3.5 + Python 3.5 +  Gradle 4.9
+[![](https://images.microbadger.com/badges/image/openkbs/blazegraph-docker.svg)](https://microbadger.com/images/openkbs/blazegraph-docker "Get your own image badge on microbadger.com") [![](https://images.microbadger.com/badges/version/openkbs/blazegraph-docker.svg)](https://microbadger.com/images/openkbs/blazegraph-docker "Get your own version badge on microbadger.com")
 
 # License Agreement
 By using this image, you agree the [Oracle Java JDK License](http://www.oracle.com/technetwork/java/javase/terms/license/index.html).
@@ -16,9 +16,6 @@ This image contains [Oracle JDK 8](http://www.oracle.com/technetwork/java/javase
 * Python 3.5.2
 * Other tools: git wget unzip vim python python-setuptools python-dev python-numpy 
 * X11 display desktop
-
-# BlazeGraph Server 2.1.4 + Java 8 (1.8.0_181) JDK + Maven 3.5 + Python 3.5
-[![](https://images.microbadger.com/badges/image/openkbs/blazegraph.svg)](https://microbadger.com/images/openkbs/blazegraph "Get your own image badge on microbadger.com") [![](https://images.microbadger.com/badges/version/openkbs/blazegraph.svg)](https://microbadger.com/images/openkbs/blazegraph "Get your own version badge on microbadger.com")
 
 # Run (recommended for easy-start)
 Image is pulling from openkbs/netbeans
@@ -53,6 +50,21 @@ To use non-default (1GB) memory for JVM, add entry to "docker.env" file
 To use non-default (1GB) memory for JVM, add/change entry to "docker-compose.yml" file:
       - JVM_MEM=4g
 ```
+
+# Data Persistence
+At this point, we only provide default host-based volume mapping persistence 
+```
+(from file ./docker.env -- the "#" with no space is how "run.sh" pick up the volumes mapping you specify)
+#VOLUMES_LIST="data:/var/lib/blazegraph/data .java .profile"
+```
+Then, running "**./run.sh**" will use the "docker.env" file's entry (as above) to create volume mapping
+```
+-v /home/<Your UserName>/data-docker/blazegraph-docker/data:/var/lib/blazegraph/data
+```
+# Distributed Data Persistence
+* Currently, we are working on the distributed data/file persistence solution using such as Gluster, Lustre, BeeGFS, etc. However, before we provide the cluster-enabled distributed persistence implementation, please use the above host-based volume mapping solution.
+* When deploying to OpenShift, Mesos, DC/OS, etc., you can use "envrionment parameter to further to create your own host-based file mapping.
+
 # Build
 You can build your own image locally.
 ```
