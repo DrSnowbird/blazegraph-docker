@@ -191,8 +191,8 @@ USER ${USER_NAME}
 #WORKDIR ${PRODUCT_HOME}
 WORKDIR ${HOME}
 
-ENTRYPOINT ["/docker-entrypoint.sh"]
-#CMD ["/bin/bash", "-c", "${PRODUCT_FULL_PATH_EXE}"]
+#ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["/bin/bash", "-c", "${PRODUCT_FULL_PATH_EXE}"]
 
 # -- debug only --
 #ENTRYPOINT ["/bin/bash"]
