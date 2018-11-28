@@ -1,0 +1,23 @@
+version: '3' 
+services:
+  blazegraph:
+    image: openkbs/blazegraph
+    build:
+        context: .
+        dockerfile: Dockerfile
+    container_name: blazegraph
+    environment:
+      - USER_ID=${USER_ID:-1000}
+      - GROUP_ID=${GROUP_ID:-1000}
+      - JVM_MEM=1g
+    env_file:
+      - ./docker.env
+    ports:
+      - 9999:9999
+    volumes:
+      - $PWD/workspace:/home/developer/workspace
+      - $PWD/data:/data 
+      - $PWD/config:/usr/blazegraph/config 
+      - $PWD/.java:/.java 
+      - $PWD/.profile:/.profile
+

@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+
+<rdf:RDF
+xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+xmlns:si="https://www.w3schools.com/rdf/"
+xmlns:dc= "http://purl.org/dc/elements/1.1/"
+xmlns:kbs="http://www.openkbs.org/kbs#"
+xml:base="http://www.animals.fake/animals#"
+>
+
+<rdf:Description rdf:about="https://www.w3schools.com">
+  <dc:description>W3Schools - Free tutorials</dc:description>
+  <dc:publisher>Refsnes Data as</dc:publisher>
+  <dc:date>2008-09-01</dc:date>
+  <dc:type>Web Development</dc:type>
+  <dc:format>text/html</dc:format>
+  <dc:language>en</dc:language>
+</rdf:Description>
+
+<rdf:Description rdf:about="https://www.w3schools.com">
+  <si:title>W3Schools</si:title>
+  <si:author>Jan Egil Refsnes</si:author>
+</rdf:Description>
+
+<rdf:Description
+rdf:about="http://www.openkbs.org/kbs/Empire Burlesque">
+  <kbs:artist>Bob Dylan</kbs:artist>
+  <kbs:country>USA</kbs:country>
+  <kbs:company>Columbia</kbs:company>
+  <kbs:price>10.90</kbs:price>
+  <kbs:year>1985</kbs:year>
+</rdf:Description>
+
+<rdf:Description
+rdf:about="http://www.openkbs.org/kbs/Hide your heart">
+  <kbs:artist>Bonnie Tyler</kbs:artist>
+  <kbs:country>UK</kbs:country>
+  <kbs:company>CBS Records</kbs:company>
+  <kbs:price>9.90</kbs:price>
+  <kbs:year>1988</kbs:year>
+</rdf:Description>
+
+<rdf:Description rdf:about="https://www.w3schools.com">
+  <si:title>W3Schools.com</si:title>
+  <si:author>Jan Egil Refsnes</si:author>
+</rdf:Description>
+
+<rdf:Description
+rdf:about="http://www.openkbs.org/kbs/Beatles">
+  <kbs:artist>
+    <rdf:Bag>
+      <rdf:li>John</rdf:li>
+      <rdf:li>Paul</rdf:li>
+      <rdf:li>George</rdf:li>
+      <rdf:li>Ringo</rdf:li>
+    </rdf:Bag>
+  </kbs:artist>
+</rdf:Description>
+
+<rdf:Description
+rdf:about="http://www.openkbs.org/kbs/Beatles">
+  <kbs:format>
+    <rdf:Alt>
+      <rdf:li>CD</rdf:li>
+      <rdf:li>Record</rdf:li>
+      <rdf:li>Tape</rdf:li>
+    </rdf:Alt>
+  </kbs:format>
+</rdf:Description>
+
+<rdf:Description
+rdf:about="http://openkbs.org/kbs/Beatles">
+  <kbs:artist rdf:parseType="Collection">
+    <rdf:Description rdf:about="http://openkbs.org/kbs/Beatles/George"/>
+    <rdf:Description rdf:about="http://openkbs.org/kbs/Beatles/John"/>
+    <rdf:Description rdf:about="http://openkbs.org/kbs/Beatles/Paul"/>
+    <rdf:Description rdf:about="http://openkbs.org/kbs/Beatles/Ringo"/>
+  </kbs:artist>
+</rdf:Description>
+
+<rdf:Description rdf:ID="animal">
+  <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+</rdf:Description>
+
+<rdf:Description rdf:ID="horse">
+  <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Class"/>
+  <rdfs:subClassOf rdf:resource="#animal"/>
+</rdf:Description>
+
+</rdf:RDF>
+
