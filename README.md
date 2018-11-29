@@ -33,6 +33,17 @@ Welcome to the Blazegraph(tm) Database.
 Go to http://172.17.0.3:9999/blazegraph/ to get started.
 ```
 
+# Run (manually)
+The following example shows customized command to launch container:
+```
+docker run --rm -d --name=blazegraph-docker --restart=no \
+    --user 1000 \ 
+    -v /home/user1/data-docker/blazegraph-docker/data:/var/lib/blazegraph/data \
+    -v /home/user1/data-docker/blazegraph-docker/.java:/home/developer/.java \
+    -v /home/user1/data-docker/blazegraph-docker/.profile:/home/developer/.profile \
+    -p 9999:9999 \
+    openkbs/blazegraph-docker
+```
 # Demo
 To demonstrate the Blazegraph with FreeText Search capability as powerful combination with RDF/Sparql query/search, you can load the "Hello.rdf" using the following steps after you login to Openshift/Minishift Web UI:
 ```

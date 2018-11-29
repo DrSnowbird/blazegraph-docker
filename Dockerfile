@@ -184,6 +184,9 @@ VOLUME ${PRODUCT_WORKSPACE}
 VOLUME ${PRODUCT_DATA}
 VOLUME ${DATA_DIR}
 
+ARG PRODUCT_PORTS=${PRODUCT_PORTS:-9999}
+EXPOSE ${PRODUCT_PORTS}
+
 #####################################
 #### ---- Start Application ---- ####
 #####################################
