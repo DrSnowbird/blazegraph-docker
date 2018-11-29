@@ -174,9 +174,10 @@ RUN groupadd -g ${GROUP_ID} ${USER_NAME} && \
 ARG PRODUCT_PROFILE=${PRODUCT_PROFILE:-${HOME}/.${PRODUCT_NAME}-${PRODUCT_VERSION}}
 
 RUN mkdir -p ${PRODUCT_WORKSPACE} ${PRODUCT_PROFILE} ${PRODUCT_DATA} ${DATA_DIR} && \
-    chown -R ${USER_NAME}:${USER_NAME} ${BLZG_HOME} ${HOME} && \
+    chown -R ${USER_NAME}:${USER_NAME} ${BLZG_HOME} ${HOME} /docker-entrypoint.sh && \
     chmod -R 0755 ${BLZG_HOME} && \
-    chmod -R 0777 ${BLZG_HOME}/log
+    chmod -R 0777 ${BLZG_HOME}/log && \
+    chmod 0755 /docker-entrypoint.sh
 
 VOLUME ${PRODUCT_PROFILE} 
 VOLUME ${PRODUCT_WORKSPACE}
