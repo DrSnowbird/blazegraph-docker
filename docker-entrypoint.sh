@@ -21,9 +21,10 @@ if [ $# -lt 1 ]; then
     #### ------------------------------------------------------------------------
     #sudo -E /bin/bash -c "(JAVA_HOME=${JAVA_HOME:-/usr/java}; JAVACMD=${JAVA_HOME}/bin/java; ${EXE_COMMAND:-echo Hello})"
     #cd ${PRODUCT_HOME}; /bin/bash -c "${PRODUCT_HOME}/bin/${PRODUCT_EXE}"
-    cd ${PRODUCT_HOME}; /bin/bash -c "${PRODUCT_FULL_PATH_EXE}"
-    exec "/bin/bash";
+    (cd ${PRODUCT_HOME}; /bin/bash -c "${PRODUCT_FULL_PATH_EXE}")
+    #exec "/bin/bash";
 else
-    exec "$@";
+    (cd ${PRODUCT_HOME}; /bin/bash -c "${PRODUCT_FULL_PATH_EXE} $@")
+    #exec "$@";
 fi
 

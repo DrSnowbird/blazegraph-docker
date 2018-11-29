@@ -113,7 +113,7 @@ ARG PRODUCT_DOWNLOAD_URL=${PRODUCT_DOWNLOAD_URL:-${PRODUCT_MIRROR_SITE_URL}/${PR
 WORKDIR ${PRODUCT_INSTALL_ROOT_DIR}
 
 RUN \
-    wget -c ${PRODUCT_DOWNLOAD_URL}/${PRODUCT_TAR} && \
+    wget -c --no-check-certificate ${PRODUCT_DOWNLOAD_URL}/${PRODUCT_TAR} && \
     tar xvf ${PRODUCT_TAR} && \
     mv ${PRODUCT_NAME}-tgz-${PRODUCT_VERSION} ${PRODUCT_NAME} && \
     rm -f ${PRODUCT_TAR} 
@@ -175,7 +175,8 @@ ARG PRODUCT_PROFILE=${PRODUCT_PROFILE:-${HOME}/.${PRODUCT_NAME}-${PRODUCT_VERSIO
 
 RUN mkdir -p ${PRODUCT_WORKSPACE} ${PRODUCT_PROFILE} ${PRODUCT_DATA} ${DATA_DIR} && \
     chown -R ${USER_NAME}:${USER_NAME} ${BLZG_HOME} ${HOME} && \
-    chmod -R 0755 ${BLZG_HOME}
+    chmod -R 0755 ${BLZG_HOME} && \
+    chmod -R 0777 ${BLZG_HOME}/log
 
 VOLUME ${PRODUCT_PROFILE} 
 VOLUME ${PRODUCT_WORKSPACE}
@@ -188,11 +189,12 @@ VOLUME ${DATA_DIR}
 
 USER ${USER_NAME}
 
-#WORKDIR ${PRODUCT_HOME}
-WORKDIR ${HOME}
+WORKDIR ${PRODUCT_HOME}
+#WORKDIR ${HOME}
 
-#ENTRYPOINT ["/docker-entrypoint.sh"]
-CMD ["/bin/bash", "-c", "${PRODUCT_FULL_PATH_EXE}"]
+#CMD ["/bin/bash", "-c", "${PRODUCT_FULL_PATH_EXE}"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["start"]
 
 # -- debug only --
 #ENTRYPOINT ["/bin/bash"]

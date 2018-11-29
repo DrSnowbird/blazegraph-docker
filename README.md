@@ -34,37 +34,36 @@ Go to http://172.17.0.3:9999/blazegraph/ to get started.
 ```
 
 # Demo
-To demonstrate the Blazegraph with FreeText Search capability as powerful combination with RDF/Sparql query/search, you can load the "Hello.rdf" using the following steps
+To demonstrate the Blazegraph with FreeText Search capability as powerful combination with RDF/Sparql query/search, you can load the "Hello.rdf" using the following steps after you login to Openshift/Minishift Web UI:
 ```
+First, Create Project, say, ["semantics-engine"], then
 click [UPDATE] tab 
     -> select [Choose File] button at lower-left corner
-        -> pick "blazegraph-docker/rdf-samples" from the pop-up file chooser, then click OK/done
+        -> pick "blazegraph-docker/rdf-samples/Hello.rdf" from the pop-up file chooser, then click OK/done
     -> click [Update] button at the lower center of the screen.
-... You will see it is loading up the Hello.rdf file into Blazegraph database.
+... You will see it is loading up the "Hello.rdf" file into Blazegraph database.
 click upper-right corner [SEARCH], then type "web" then return key or hit magnify lens icon.
 ... You will see it returns one tuple of "www.w3schools.com" with subject.
 ... Congratulation! You have successfully launched, loaded, and tested the powerful RDF/FreeText Search Engine/Database - "Blazegraph"!
 ```
 # Deployment
-**Kubernetes / Minikube**: Tested Ok: 
+**Kubernetes / Minikube**: 
 ```
 (Using Minikube's Web UI Dashboard http://192.168.99.102) -> Deployments -> "CREATE AN APP"
 To use non-default (1GB) memory for JVM, add the run-time env vars in the configuration
     JVM_MEM=4g
 ```
-**Openshift / Minishift**: Tested Ok: 
+**Openshift / Minishift**: 
 ```
-(Using OpenShift's Web UI) -> Deployments, then Create Route to expose to external Access.
+(Using OpenShift's Web UI) -> Deploy, then Create Route to expose to external Access.
 ```
-**Portainer / Localhost**: Tested OK: 
+**Portainer / Local host**:
 ```
 Using "./run.sh"
-To use non-default (1GB) memory for JVM, add entry to "docker.env" file
-  JVM_MEM=4g
 ```
 **Docker-compose**:
 ```
-To use non-default (1GB) memory for JVM, add/change entry to "docker-compose.yml" file:
+To use non-default (e.g., 4GB) memory for JVM, add/change entry to "docker-compose.yml" file:
       - JVM_MEM=4g
 ```
 
