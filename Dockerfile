@@ -2,15 +2,15 @@ FROM openkbs/jdk-mvn-py3
 
 MAINTAINER DrSnowbird "DrSnowbird@openkbs.org"
 
-## -------------------------------------------------------------------------------
-## ---- USER_NAME is defined in parent image: openkbs/jdk-mvn-py3-x11 already ----
-## -------------------------------------------------------------------------------
-ENV USER_NAME=${USER_NAME:-blgz}
-ENV HOME=/home/${USER_NAME}
+ARG VCS_REF=${VCS_REF}
+ARG VCS_URL=${VCS_URL}
 
-## ----------------------------------------------------------------------------
-## ---- To change to different Product version:! ----
-## ----------------------------------------------------------------------------
+LABEL org.label-schema.vcs-ref=$VCS_REF \
+      org.label-schema.vcs-url="https://github.com/${VCS_URL}"
+          
+## ---------------------------------
+## ---- Product Specifications: ----
+## ---------------------------------
 
 ## -- 0.) Product Provider and Name: -- ##
 ARG PRODUCT_INSTALL_ROOT_DIR=${PRODUCT_INSTALL_ROOT_DIR:-/var/lib}
@@ -59,9 +59,9 @@ ENV PRODUCT_DATA=${PRODUCT_DATA}
 ARG PRODUCT_WORKSPACE=${PRODUCT_WORKSPACE:-${HOME}/workspace}
 ENV PRODUCT_WORKSPACE=${PRODUCT_WORKSPACE:-${HOME}/workspace}
 
-#### ------------------------ ####
-#### ---- BlazeGraph Server   ####
-#### ------------------------ ####
+#### ----------------------------
+#### ---- BlazeGraph Server -----
+#### ----------------------------
 #### (Mapping from PRODUCCT_HOME to product-specific HOME)
 ARG BLZG_HOME=${PRODUCT_HOME}
 ENV BLZG_HOME=${PRODUCT_HOME}
@@ -125,19 +125,18 @@ RUN \
     ## (not exist yet) mv ${BLZG_HOME}/war/WEB-INF/classes/RWStore.properties ${BLZG_HOME}/war/WEB-INF/classes/RWStore.properties.ORIG && \
     mv ${PRODUCT_FULL_PATH_EXE} ${PRODUCT_FULL_PATH_EXE}.ORIG 
 
-##################################
-#### Install Libs or Plugins  ####
-##################################
-# (debug use only) 
+#### ---------------------------------
+#### ---- Install Libs or Plugins ----
+#### ---------------------------------
 # ... add Product plugin if any 
 RUN \
     apt-get update -y && \
     apt-get install -y sudo ack-grep && \
     rm -rf /var/lib/apt/lists/*
 
-#### ------------------------ ####
+#### -----------------------------
 #### ---- Blazegraph Override ----
-#### ------------------------ ####
+#### -----------------------------
 ## /opt/blazegraph/conf/RWStore.properties
 COPY ./override/RWStore.properties ${BIGDATA_PROPERTY}
 COPY ./override/log4j.properties ${BLZG_HOME}/war/WEB-INF/classes/log4j.properties
@@ -149,9 +148,9 @@ COPY ./override/blazegraph.sh ${PRODUCT_FULL_PATH_EXE}
 COPY ./rdf-samples ${PRODUCT_HOME}/
 COPY ./docker-entrypoint.sh /
 
-################################
-#### ---- user: Non-root   ----
-################################
+#### ------------------------
+#### ---- user: Non-root ----
+#### ------------------------
 ## ---- user: developer ----
 ENV USER_NAME=blgz
 ENV HOME=/home/${USER_NAME}
@@ -168,9 +167,9 @@ RUN groupadd -g ${GROUP_ID} ${USER_NAME} && \
     export uid=${USER_ID} gid=${GROUP_ID} && \
     mkdir -p ${HOME}
 
-#################################
-#### Set up run environments ####
-#################################
+#### ---------------------------------
+#### ---- Set up run environments ----
+#### --------------------------------- 
 ARG PRODUCT_PROFILE=${PRODUCT_PROFILE:-${HOME}/.${PRODUCT_NAME}-${PRODUCT_VERSION}}
 
 RUN mkdir -p ${PRODUCT_WORKSPACE} ${PRODUCT_PROFILE} ${PRODUCT_DATA} ${DATA_DIR} && \
@@ -187,14 +186,13 @@ VOLUME ${DATA_DIR}
 ARG PRODUCT_PORTS=${PRODUCT_PORTS:-9999}
 EXPOSE ${PRODUCT_PORTS}
 
-#####################################
-#### ---- Start Application ---- ####
-#####################################
+#### ---------------------------
+#### ---- Start Application ----
+#### ---------------------------
 
 USER ${USER_NAME}
 
 WORKDIR ${PRODUCT_HOME}
-#WORKDIR ${HOME}
 
 #CMD ["/bin/bash", "-c", "${PRODUCT_FULL_PATH_EXE}","start"]
 ENTRYPOINT ["/docker-entrypoint.sh"]

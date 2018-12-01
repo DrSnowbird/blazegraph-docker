@@ -1,5 +1,3 @@
-# !!!!!!!! --- BETA testing mode --- !!!!!!!!!!
-# !!!!!!!! --- NOT-READY-for-Public-Consumption Yet --- !!!!!!!!!!
 # BlazeGraph Server 2.1.4 + Java 8 (1.8.0_191) JDK + Maven 3.5 + Python 3.5 +  Gradle 4.9
 [![](https://images.microbadger.com/badges/image/openkbs/blazegraph-docker.svg)](https://microbadger.com/images/openkbs/blazegraph-docker "Get your own image badge on microbadger.com") [![](https://images.microbadger.com/badges/version/openkbs/blazegraph-docker.svg)](https://microbadger.com/images/openkbs/blazegraph-docker "Get your own version badge on microbadger.com")
 
@@ -59,16 +57,19 @@ click upper-right corner [SEARCH], then type "web" then return key or hit magnif
 ```
 # Deployment
 **Kubernetes / Minikube**: 
+- (See docs/Kubernetes-Dashboard-Deploy-Services.png)
 ```
 (Using Minikube's Web UI Dashboard http://192.168.99.102) -> Deployments -> "CREATE AN APP"
 To use non-default (1GB) memory for JVM, add the run-time env vars in the configuration
     JVM_MEM=4g
 ```
 **Openshift / Minishift**: 
+- (See docs/OpenShift-blazegraph-docker-deployment.png)
 ```
 (Using OpenShift's Web UI) -> Deploy, then Create Route to expose to external Access.
 ```
 **Portainer / Local host**:
+- (See docs/Portainer-as-Docker-Desktop.png)
 ```
 Using "./run.sh"
 ```
@@ -180,6 +181,11 @@ Hello, World
 Hence, the alias above, "djavac" and "djava" is your docker-based "javac" and "java" commands and
 it will work the same way as your local installed Java's "javac" and "java" commands.
 
+# See Also
+* [Semantic Analytics Stack (SANSA)](http://sansa-stack.net/) - Big Data Analytics + Semantic Technology Stacks
+* [OpenKBS/GraphDB-Docker](https://github.com/DrSnowbird/graphdb) - Ontotext GraphDB / RDF Platform
+* [OpenKBS/blazegraph-docker](https://github.com/DrSnowbird/blazegraph-docker) - Blazegraph RDF Database Engine (CPU + GPU)
+* [Google Refine w/RDF Extension](https://github.com/DrSnowbird/grefine-rdf-extension) - Google Refine with RDF Extension
 
 # Reference
 * [BlazeGraph](https://www.blazegraph.com/)

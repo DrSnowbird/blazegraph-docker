@@ -13,7 +13,7 @@ MY_DIR=$(dirname "$(readlink -f "$0")")
 DOCKERFILE=${1:-Dockerfile}
 
 ###################################################
-#### ---- Change this only if want to use your own
+#### ---- Change this if you want to use your own
 ###################################################
 ORGANIZATION=openkbs
 
@@ -37,11 +37,21 @@ function detectDockerEnvFile() {
 }
 detectDockerEnvFile
 
+###################################################
+#### ---- Container package information ----
+###################################################
+DOCKER_IMAGE_REPO=`echo $(basename $PWD)|tr '[:upper:]' '[:lower:]'|tr "/: " "_" `
+imageTag=${1:-"${ORGANIZATION}/${DOCKER_IMAGE_REPO}"}
 
 ###################################################
 #### ---- Generate build-arg arguments ----
 ###################################################
 BUILD_ARGS=""
+BUILD_DATE="`date -u +"%Y-%m-%dT%H:%M:%SZ"`"
+VCS_REF="`git rev-parse --short HEAD`"
+VCS_URL="https://github.com/`echo $(basename $PWD)`"
+BUILD_ARGS="--build-arg BUILD_DATE=${BUILD_DATE} --build-arg VCS_REF=${VCS_REF}"
+
 ## -- ignore entries start with "#" symbol --
 function generateBuildArgs() {
     for r in `cat ${DOCKER_ENV_FILE} | grep -v '^#'`; do
@@ -55,10 +65,8 @@ generateBuildArgs
 echo "BUILD_ARGS=${BUILD_ARGS}"
 
 ###################################################
-#### ---- Container package information ----
+#### ---- Build Container ----
 ###################################################
-DOCKER_IMAGE_REPO=`echo $(basename $PWD)|tr '[:upper:]' '[:lower:]'|tr "/: " "_" `
-imageTag=${1:-"${ORGANIZATION}/${DOCKER_IMAGE_REPO}"}
 
 docker build --rm -t ${imageTag} \
     ${BUILD_ARGS} \
