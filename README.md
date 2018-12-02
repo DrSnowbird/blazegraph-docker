@@ -1,4 +1,5 @@
-# BlazeGraph Server 2.1.4 + Java 8 (1.8.0_191) JDK + Maven 3.5 + Python 3.5 +  Gradle 4.9
+# BlazeGraph Server 2.1.4 + Java 8 JDK + Maven 3.5 + Python 3.5 +  Gradle 4.9
+
 [![](https://images.microbadger.com/badges/image/openkbs/blazegraph-docker.svg)](https://microbadger.com/images/openkbs/blazegraph-docker "Get your own image badge on microbadger.com") [![](https://images.microbadger.com/badges/version/openkbs/blazegraph-docker.svg)](https://microbadger.com/images/openkbs/blazegraph-docker "Get your own version badge on microbadger.com")
 
 # License Agreement
@@ -181,12 +182,18 @@ Hello, World
 Hence, the alias above, "djavac" and "djava" is your docker-based "javac" and "java" commands and
 it will work the same way as your local installed Java's "javac" and "java" commands.
 
-# See Also
-* [Semantic Analytics Stack (SANSA)](http://sansa-stack.net/) - Big Data Analytics + Semantic Technology Stacks
-* [OpenKBS/GraphDB-Docker](https://github.com/DrSnowbird/graphdb) - Ontotext GraphDB / RDF Platform
+# Related Tools
 * [OpenKBS/blazegraph-docker](https://github.com/DrSnowbird/blazegraph-docker) - Blazegraph RDF Database Engine (CPU + GPU)
 * [Google Refine w/RDF Extension](https://github.com/DrSnowbird/grefine-rdf-extension) - Google Refine with RDF Extension
+* [OpenKBS/GraphDB-Docker](https://github.com/DrSnowbird/graphdb) - Ontotext GraphDB / RDF Platform
+* [Docker-based Stanford Protege (RDF/OWL) IDE](https://hub.docker.com/r/openkbs/protege-docker)
+* [Web-based Protege Docker by openkbs/docker-webprotege](https://hub.docker.com/r/openkbs/docker-webprotege/)
+* [big-data-europe/docker-kafkasail](https://github.com/big-data-europe/docker-kafkasail) - Apache Tomcat with OpenRDF's (rdf4j) openrdf-workbench and openrdf-sesame server Apache Tomcat with OpenRDF's (rdf4j) openrdf-workbench and openrdf-sesame server 
+* [yyz1989/docker-rdf4j](https://github.com/yyz1989/docker-rdf4j) - RDF4J Server (which is RDF database server and the SPARQL endpoint service) and RDF4J Workbench (which is the Web UI of RDF4J Server for database and data management tasks)
 
-# Reference
-* [BlazeGraph](https://www.blazegraph.com/)
+# References
+* [Stanford Protege](https://protege.stanford.edu/)
+* [RDF4J (Java RDF)](http://rdf4j.org/)
+* [Semantic Analytics Stack (SANSA)](http://sansa-stack.net/) - Big Data Analytics + Semantic Technology Stacks
 * [FullTextSearch](https://wiki.blazegraph.com/wiki/index.php/FullTextSearch)
+* [BlazeGraph](https://www.blazegraph.com/)

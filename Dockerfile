@@ -152,7 +152,7 @@ COPY ./docker-entrypoint.sh /
 #### ---- user: Non-root ----
 #### ------------------------
 ## ---- user: developer ----
-ENV USER_NAME=blgz
+ENV USER_NAME=blzg
 ENV HOME=/home/${USER_NAME}
 
 ARG USER_ID=${USER_ID:-1000}
