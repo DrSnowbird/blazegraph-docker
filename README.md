@@ -60,9 +60,13 @@ click upper-right corner [SEARCH], then type "web" then return key or hit magnif
 **Kubernetes / Minikube**: 
 - (See docs/Kubernetes-Dashboard-Deploy-Services.png)
 ```
-(Using Minikube's Web UI Dashboard http://192.168.99.102) -> Deployments -> "CREATE AN APP"
+(Using Minikube's Web UI Dashboard http://192.168.99.102) -> "+CREATE" -> "CREATE AN APP"
 To use non-default (1GB) memory for JVM, add the run-time env vars in the configuration
     JVM_MEM=4g
+```
+Then, you will access Blazegraph Docker container like the following except port will be different:
+```
+http://192.168.99.100:32721/blazegraph/
 ```
 **Openshift / Minishift**: 
 - (See docs/OpenShift-blazegraph-docker-deployment.png)
