@@ -65,6 +65,23 @@ generateBuildArgs
 echo "BUILD_ARGS=${BUILD_ARGS}"
 
 ###################################################
+#### ---- Setup Proxy ----
+###################################################
+if [ "${HTTP_PROXY}" != "" ]; then
+    HTTP_PROXY_PARAM="--build-arg http_proxy=${HTTP_PROXY} --build-arg https_proxy=${HTTP_PROXY}"
+else
+    HTTP_PROXY_PARAM=
+fi
+if [ "${NO_PROXY}" != "" ]; then
+    HTTP_PROXY_PARAM="${HTTP_PROXY_PARAM} --build-arg no_proxy=${NO_PROXY}"
+else
+    HTTP_PROXY_PARAM=${HTTP_PROXY_PARAM}
+fi
+
+BUILD_ARGS="${BUILD_ARGS} ${HTTP_PROXY_PARAM}"
+echo "BUILD_ARGS=${BUILD_ARGS}"
+
+###################################################
 #### ---- Build Container ----
 ###################################################
 
