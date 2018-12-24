@@ -58,23 +58,23 @@ click upper-right corner [SEARCH], then type "web" then return key or hit magnif
 ```
 # Deployment
 ## Kubernetes / Minikube 
-- (See docs/Kubernetes-Dashboard-Deploy-Services.png)
+See [docs/Kubernetes-Dashboard-Deploy-Services.png](https://github.com/DrSnowbird/blazegraph-docker/blob/master/docs/Kubernetes-Dashboard-Deploy-Services.png) and [doc/Kubernetes-Dashboard-UI.png ](https://github.com/DrSnowbird/blazegraph-docker/blob/master/docs/Kubernetes-Dashboard-UI.png).
 ```
 (Using Minikube's Web UI Dashboard http://192.168.99.102) -> "+CREATE" -> "CREATE AN APP"
-To use non-default (1GB) memory for JVM, add the run-time env vars in the configuration
+To use non-default (1GB) memory for JVM, add the run-time env vars in the configuration, e.g. 4 GB Memory
     JVM_MEM=4g
 ```
-Then, you will access Blazegraph Docker container like the following except port will be different:
+Then, you will access Blazegraph Docker container like the following except port will be different for yours:
 ```
 http://192.168.99.100:32721/blazegraph/
 ```
 ## Openshift / Minishift 
-- (See docs/OpenShift-blazegraph-docker-deployment.png)
+See [docs/OpenShift-blazegraph-docker-deployment.png](https://github.com/DrSnowbird/blazegraph-docker/blob/master/docs/OpenShift-blazegraph-docker-deployment.png).
 ```
-(Using OpenShift's Web UI) -> Deploy, then Create Route to expose to external Access.
+(Using OpenShift's Web UI) -> Deploy -> Image, wait a few seconds for docker pod to up, then Create Route to expose to external Access.
 ```
 ## Portainer as Desktop
-- (See docs/Portainer-as-Docker-Desktop.png)
+See [docs/Portainer-as-Docker-Desktop.png](https://github.com/DrSnowbird/blazegraph-docker/blob/master/docs/Portainer-as-Docker-Desktop.png).
 ```
 Using "./run.sh"
 ```
