@@ -57,7 +57,7 @@ click upper-right corner [SEARCH], then type "web" then return key or hit magnif
 ... Congratulation! You have successfully launched, loaded, and tested the powerful RDF/FreeText Search Engine/Database - "Blazegraph"!
 ```
 # Deployment
-**Kubernetes / Minikube**: 
+## Kubernetes / Minikube 
 - (See docs/Kubernetes-Dashboard-Deploy-Services.png)
 ```
 (Using Minikube's Web UI Dashboard http://192.168.99.102) -> "+CREATE" -> "CREATE AN APP"
@@ -68,17 +68,17 @@ Then, you will access Blazegraph Docker container like the following except port
 ```
 http://192.168.99.100:32721/blazegraph/
 ```
-**Openshift / Minishift**: 
+## Openshift / Minishift 
 - (See docs/OpenShift-blazegraph-docker-deployment.png)
 ```
 (Using OpenShift's Web UI) -> Deploy, then Create Route to expose to external Access.
 ```
-**Portainer / Local host**:
+## Portainer as Desktop
 - (See docs/Portainer-as-Docker-Desktop.png)
 ```
 Using "./run.sh"
 ```
-**Docker-compose**:
+## Docker-compose
 ```
 To use non-default (e.g., 4GB) memory for JVM, add/change entry to "docker-compose.yml" file:
       - JVM_MEM=4g
@@ -122,18 +122,24 @@ docker run -d --name some-blazegraph -v $PWD/data:/data -i -t my/blazegraph
 # Shell into the Docker instance
 ```bash
 docker exec -it some-blazegraph /bin/bash
+or 
+./shell.sh (if you use default ./run.sh -- not your local build)
 ```
-# Run Blazegraph web, sparql, REST
-For more information, please visit: https://wiki.blazegraph.com/wiki/index.php/NanoSparqlServer 
 
-Web UI:
+# Web UI
 ```http
 Web UI: http://<ip_address>:9999/
 ```
 
-For SPARQL Endpoint, see more at https://wiki.blazegraph.com/wiki/index.php/REST_API#SPARQL_End_Point
+# Blazegraph Sparql, REST
+For more information, please visit: 
+* https://wiki.blazegraph.com/wiki/index.php/NanoSparqlServer 
+For SPARQL Endpoint, see more at 
+* https://wiki.blazegraph.com/wiki/index.php/REST_API#SPARQL_End_Point
+
+To use SPARQL REST API, from remote SPARQL Client:
 ```http
-SPARQL UI: http://<ip_address>:9999/bigdata
+http://<ip_address>:9999/bigdata
 ```
 
 # (Optional Use) Run Python code
