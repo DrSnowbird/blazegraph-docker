@@ -1,4 +1,4 @@
-# BlazeGraph Server 2.1.4 + Java 8 JDK + Maven 3.5 + Python 3.5 +  Gradle 4.9
+# BlazeGraph Server 2.1.4 + Java 8 (1.8.0_201) JDK + Maven 3.6 + Python 3.5 + PIP3 18.1 + + npm 3.5.2 + nodejs v4.2.6 + Gradle 5.1
 
 [![](https://images.microbadger.com/badges/image/openkbs/blazegraph-docker.svg)](https://microbadger.com/images/openkbs/blazegraph-docker "Get your own image badge on microbadger.com") [![](https://images.microbadger.com/badges/version/openkbs/blazegraph-docker.svg)](https://microbadger.com/images/openkbs/blazegraph-docker "Get your own version badge on microbadger.com")
 
@@ -10,16 +10,18 @@ This image contains [Oracle JDK 8](http://www.oracle.com/technetwork/java/javase
 * Non-root user for container:
   We are tightening down the security of containerfor this container, we use non-root user (blzg as user) to run the Blazegraph. 
 * Though, currently, you can go into container to use "sudo" to do admin work. 
-  For production deployment,we will remove sudo access inside container and other vulnerability codes. At this point, we are still relative relaxing in not fully lock down security yet.
+  For production deployment, we recommend to remove sudo access inside container and other vulnerability codes. At this point, we are still relative relaxing in not fully lock down security yet.
 
 # Components
 * [BlazeGraph](https://www.blazegraph.com/) 2.1.4 service will be running at http://<server_ip:9999>/
-* java version "1.8.0_191"
-  Java(TM) SE Runtime Environment (build 1.8.0_191-b12)
-  Java HotSpot(TM) 64-Bit Server VM (build 25.191-b12, mixed mode)
-* Apache Maven 3.5.3
+* java version "1.8.0_201"
+  Java(TM) SE Runtime Environment (build 1.8.0_201-b09)
+  Java HotSpot(TM) 64-Bit Server VM (build 25.201-b09, mixed mode)
+* Apache Maven 3.6.0
 * Python 3.5.2
-* Other tools: git wget unzip vim python python-setuptools python-dev python-numpy 
+* npm 3.5.2 + nodejs v4.2.6
+* Gradle 5.1
+* Other tools: git wget unzip vim python python-setuptools python-dev pandas python-numpy 
 
 # Run (recommended for easy-start)
 Image is pulling from openkbs/blazegraph
@@ -29,7 +31,7 @@ Image is pulling from openkbs/blazegraph
 A successfully starting of BlazeGraph will have the following message displayed (IP address below will be different):
 ```
 Welcome to the Blazegraph(tm) Database.
-Go to http://172.17.0.3:9999/blazegraph/ to get started.
+Go to http://<ip_address>:9999/blazegraph/ to get started.
 ```
 
 # Run (manually)
@@ -207,3 +209,64 @@ it will work the same way as your local installed Java's "javac" and "java" comm
 * [Semantic Analytics Stack (SANSA)](http://sansa-stack.net/) - Big Data Analytics + Semantic Technology Stacks
 * [FullTextSearch](https://wiki.blazegraph.com/wiki/index.php/FullTextSearch)
 * [BlazeGraph](https://www.blazegraph.com/)
+
+# Releases information
+```
+root@c3fd448b277c:/usr# ./printVersions.sh 
++ echo JAVA_HOME=/usr/java
+JAVA_HOME=/usr/java
++ java -version
+java version "1.8.0_201"
+Java(TM) SE Runtime Environment (build 1.8.0_201-b09)
+Java HotSpot(TM) 64-Bit Server VM (build 25.201-b09, mixed mode)
++ mvn --version
+Apache Maven 3.6.0 (97c98ec64a1fdfee7767ce5ffb20918da4f719f3; 2018-10-24T18:41:47Z)
+Maven home: /usr/apache-maven-3.6.0
+Java version: 1.8.0_201, vendor: Oracle Corporation, runtime: /usr/jdk1.8.0_201/jre
+Default locale: en_US, platform encoding: ANSI_X3.4-1968
+OS name: "linux", version: "4.15.0-43-generic", arch: "amd64", family: "unix"
++ python -V
+Python 2.7.12
++ python3 -V
+Python 3.5.2
++ pip --version
+pip 18.1 from /usr/local/lib/python3.5/dist-packages/pip (python 3.5)
++ pip3 --version
+pip 18.1 from /usr/local/lib/python3.5/dist-packages/pip (python 3.5)
++ gradle --version
+
+------------------------------------------------------------
+Gradle 5.1.1
+------------------------------------------------------------
+
+Build time:   2019-01-10 23:05:02 UTC
+Revision:     3c9abb645fb83932c44e8610642393ad62116807
+
+Kotlin DSL:   1.1.1
+Kotlin:       1.3.11
+Groovy:       2.5.4
+Ant:          Apache Ant(TM) version 1.9.13 compiled on July 10 2018
+JVM:          1.8.0_201 (Oracle Corporation 25.201-b09)
+OS:           Linux 4.15.0-43-generic amd64
+
++ npm --version
+3.5.2
++ nodejs --version
+v4.2.6
++ cat /etc/lsb-release /etc/os-release
+DISTRIB_ID=Ubuntu
+DISTRIB_RELEASE=16.04
+DISTRIB_CODENAME=xenial
+DISTRIB_DESCRIPTION="Ubuntu 16.04.3 LTS"
+NAME="Ubuntu"
+VERSION="16.04.3 LTS (Xenial Xerus)"
+ID=ubuntu
+ID_LIKE=debian
+PRETTY_NAME="Ubuntu 16.04.3 LTS"
+VERSION_ID="16.04"
+HOME_URL="http://www.ubuntu.com/"
+SUPPORT_URL="http://help.ubuntu.com/"
+BUG_REPORT_URL="http://bugs.launchpad.net/ubuntu/"
+VERSION_CODENAME=xenial
+UBUNTU_CODENAME=xenial
+```
