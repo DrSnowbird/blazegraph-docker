@@ -1,4 +1,4 @@
-# BlazeGraph Server 2.1.4 + Java 8 (1.8.0_201) JDK + Maven 3.6 + Python 3.5 + PIP3 18.1 + + npm 3.5.2 + nodejs v4.2.6 + Gradle 5.1
+# BlazeGraph Server 2.1.4 + Java 8 (1.8.0_201) JDK + Maven 3.6 + Python 3.5 + PIP3 18.1 + + node 11.7.0 + npm 6.5.0 + Gradle 5.1
 
 [![](https://images.microbadger.com/badges/image/openkbs/blazegraph-docker.svg)](https://microbadger.com/images/openkbs/blazegraph-docker "Get your own image badge on microbadger.com") [![](https://images.microbadger.com/badges/version/openkbs/blazegraph-docker.svg)](https://microbadger.com/images/openkbs/blazegraph-docker "Get your own version badge on microbadger.com")
 
@@ -6,11 +6,17 @@
 By using this image, you agree the [Oracle Java JDK License](http://www.oracle.com/technetwork/java/javase/terms/license/index.html).
 This image contains [Oracle JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html). You must accept the [Oracle Binary Code License Agreement for Java SE](http://www.oracle.com/technetwork/java/javase/terms/license/index.html) to use this image.
 
+# Use Cases
+This Blazegraph server is aiming for deployment over Container Cluster Platform such as Kubernetes, OpenShift, or other similar ones comparing to other light version of [openkbs/blazegrapy](https://hub.docker.com/r/openkbs/blazegraph-docker). In all, this implementation supports the following deployment uses:
+- Using ./run.sh or Portainer Container Desktop or other similar for standalone deployment.
+- Using 'docker-compose up -d' for standalone deployment.
+- Using Kubernetes, Openshift, or other platforms for cloud / cluster deployment.
+
 # Security
 * Non-root user for container:
   We are tightening down the security of containerfor this container, we use non-root user (blzg as user) to run the Blazegraph. 
 * Though, currently, you can go into container to use "sudo" to do admin work. 
-  For production deployment, we recommend to remove sudo access inside container and other vulnerability codes. At this point, we are still relative relaxing in not fully lock down security yet.
+  For production deployment, we recommend to remove sudo access inside container and other vulnerability codes. At this point, we are still relative relaxing in not fully locking down security yet.
 
 # Components
 * [BlazeGraph](https://www.blazegraph.com/) 2.1.4 service will be running at http://<server_ip:9999>/
@@ -19,7 +25,7 @@ This image contains [Oracle JDK 8](http://www.oracle.com/technetwork/java/javase
   Java HotSpot(TM) 64-Bit Server VM (build 25.201-b09, mixed mode)
 * Apache Maven 3.6.0
 * Python 3.5.2
-* npm 3.5.2 + nodejs v4.2.6
+* node v11.7.0 + npm 6.5.0 (from NodeSource official Node Distribution)
 * Gradle 5.1
 * Other tools: git wget unzip vim python python-setuptools python-dev pandas python-numpy 
 
@@ -212,7 +218,7 @@ it will work the same way as your local installed Java's "javac" and "java" comm
 
 # Releases information
 ```
-root@c3fd448b277c:/usr# ./printVersions.sh 
+blzg@7d33be3b1509:/var/lib/blazegraph$ /usr/printVersions.sh 
 + echo JAVA_HOME=/usr/java
 JAVA_HOME=/usr/java
 + java -version
@@ -235,6 +241,15 @@ pip 18.1 from /usr/local/lib/python3.5/dist-packages/pip (python 3.5)
 pip 18.1 from /usr/local/lib/python3.5/dist-packages/pip (python 3.5)
 + gradle --version
 
+Welcome to Gradle 5.1.1!
+
+Here are the highlights of this release:
+ - Control which dependencies can be retrieved from which repositories
+ - Production-ready configuration avoidance APIs
+
+For more details see https://docs.gradle.org/5.1.1/release-notes.html
+
+
 ------------------------------------------------------------
 Gradle 5.1.1
 ------------------------------------------------------------
@@ -249,10 +264,10 @@ Ant:          Apache Ant(TM) version 1.9.13 compiled on July 10 2018
 JVM:          1.8.0_201 (Oracle Corporation 25.201-b09)
 OS:           Linux 4.15.0-43-generic amd64
 
-+ npm --version
-3.5.2
-+ nodejs --version
-v4.2.6
++ npm -v
+6.5.0
++ node -v
+v11.7.0
 + cat /etc/lsb-release /etc/os-release
 DISTRIB_ID=Ubuntu
 DISTRIB_RELEASE=16.04

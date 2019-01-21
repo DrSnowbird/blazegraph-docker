@@ -1,8 +1,6 @@
-#!/bin/bash -x
+#!/bin/bash
 
 set -e
-set -i
-set -x
 
 printenv
 
@@ -15,7 +13,7 @@ export EXE_COMMAND=${1:-"echo Hello"}
 #### ---- To keep the docker process staying alive if needed.
 #### ------------------------------------------------------------------------
 if [ $# -lt 1 ]; then
-    echo "Starting docker process daemon ..."
+    echo "Starting docker process daemon ... {PRODUCT_FULL_PATH_EXE}"
     #### ------------------------------------------------------------------------
     #### ---- You need to set PRODUCT_EXE as the full-path executable binary ----
     #### ------------------------------------------------------------------------
@@ -24,6 +22,7 @@ if [ $# -lt 1 ]; then
     (cd ${PRODUCT_HOME}; /bin/bash -c "${PRODUCT_FULL_PATH_EXE}")
     #exec "/bin/bash";
 else
+    echo "Starting docker process daemon ... ${PRODUCT_FULL_PATH_EXE} with arguments $@"
     (cd ${PRODUCT_HOME}; /bin/bash -c "${PRODUCT_FULL_PATH_EXE} $@")
     #exec "$@";
 fi
