@@ -1,4 +1,4 @@
-# BlazeGraph Server 2.1.4 + Java 8 (1.8.0_201) JDK + Maven 3.6 + Python 3.5 + PIP3 18.1 + + node 11.7.0 + npm 6.5.0 + Gradle 5.1
+# BlazeGraph Server 2.1.4 + Java 8 (1.8.0_201) JDK + Maven 3.6 + Python 3.5 + pip v19 + + node v11 + npm 6 + Gradle 5
 
 [![](https://images.microbadger.com/badges/image/openkbs/blazegraph-docker.svg)](https://microbadger.com/images/openkbs/blazegraph-docker "Get your own image badge on microbadger.com") [![](https://images.microbadger.com/badges/version/openkbs/blazegraph-docker.svg)](https://microbadger.com/images/openkbs/blazegraph-docker "Get your own version badge on microbadger.com")
 
@@ -24,9 +24,9 @@ This Blazegraph server is aiming for deployment over Container Cluster Platform 
   Java(TM) SE Runtime Environment (build 1.8.0_201-b09)
   Java HotSpot(TM) 64-Bit Server VM (build 25.201-b09, mixed mode)
 * Apache Maven 3.6.0
-* Python 3.5.2
+* Python 3.5.2 + pip v19
 * node v11.7.0 + npm 6.5.0 (from NodeSource official Node Distribution)
-* Gradle 5.1
+* Gradle 5.1* Gradle 5.1
 * Other tools: git wget unzip vim python python-setuptools python-dev pandas python-numpy 
 
 # Run (recommended for easy-start)
@@ -34,10 +34,9 @@ Image is pulling from openkbs/blazegraph
 ```
 ./run.sh
 ```
-A successfully starting of BlazeGraph will have the following message displayed (IP address below will be different):
+A successfully starting of BlazeGraph will allow you to access the following URL:
 ```
-Welcome to the Blazegraph(tm) Database.
-Go to http://<ip_address>:9999/blazegraph/ to get started.
+    http://<ip_address>:9999/blazegraph/ to get started.
 ```
 
 # Run (manually)
@@ -218,7 +217,7 @@ it will work the same way as your local installed Java's "javac" and "java" comm
 
 # Releases information
 ```
-blzg@7d33be3b1509:/var/lib/blazegraph$ /usr/printVersions.sh 
+blzg@97a466ff6337:/var/lib/blazegraph$ /usr/printVersions.sh 
 + echo JAVA_HOME=/usr/java
 JAVA_HOME=/usr/java
 + java -version
@@ -236,9 +235,9 @@ Python 2.7.12
 + python3 -V
 Python 3.5.2
 + pip --version
-pip 18.1 from /usr/local/lib/python3.5/dist-packages/pip (python 3.5)
+pip 19.0.1 from /usr/local/lib/python3.5/dist-packages/pip (python 3.5)
 + pip3 --version
-pip 18.1 from /usr/local/lib/python3.5/dist-packages/pip (python 3.5)
+pip 19.0.1 from /usr/local/lib/python3.5/dist-packages/pip (python 3.5)
 + gradle --version
 
 Welcome to Gradle 5.1.1!
@@ -267,7 +266,7 @@ OS:           Linux 4.15.0-43-generic amd64
 + npm -v
 6.5.0
 + node -v
-v11.7.0
+v11.8.0
 + cat /etc/lsb-release /etc/os-release
 DISTRIB_ID=Ubuntu
 DISTRIB_RELEASE=16.04
