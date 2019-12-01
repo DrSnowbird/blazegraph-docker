@@ -1,23 +1,37 @@
-version: '3' 
+version: '3.3' 
 services:
   blazegraph:
-    image: openkbs/blazegraph
+    image: openkbs/blazegraph-docker
+    container_name: blazegraph-docker
     build:
-        context: .
-        dockerfile: Dockerfile
-    container_name: blazegraph
+      context: .
+      dockerfile: Dockerfile
     environment:
-      - USER_ID=${USER_ID:-1000}
-      - GROUP_ID=${GROUP_ID:-1000}
-      - JVM_MEM=1g
+      - USER_ID=${USER_ID:-1001}
+      - GROUP_ID=${GROUP_ID:-1001}
+      - JVM_MEM=2g
     env_file:
       - ./docker.env
     ports:
       - 9999:9999
     volumes:
+      ## Blazegraph data store
+      - type: volume
+        source: blazegraph_data
+        target: /var/lib/blazegraph/data
+        read_only: false
       - $PWD/workspace:/home/developer/workspace
-      - $PWD/data:/data 
-      - $PWD/config:/usr/blazegraph/config 
-      - $PWD/.java:/.java 
+      - $PWD/data:/home/developer/data 
+      #- $PWD/conf:/usr/blazegraph/conf
+      - $PWD/.java:/home/developer/.java 
       - $PWD/.profile:/.profile
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9999"]
+      interval: 3s
+      timeout: 5s
+      retries: 3
+  
+volumes:
+  blazegraph_data:
+    driver_options
 

@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set +e
-
 MY_DIR=$(dirname "$(readlink -f "$0")")
 
 if [ $# -lt 1 ]; then
@@ -268,16 +266,16 @@ function generateVolumeMapping() {
         ## -- Otherwise, go lookup the docker.env as ride-along source for volume definitions
         VOLUMES_LIST=`cat ${DOCKER_ENV_FILE}|grep "^#VOLUMES_LIST= *"|sed "s/[#\"]//g"|cut -d'=' -f2-`
     fi
+    echo ">>>>>>>>>>>>>>> Volume Entry LIST: $VOLUMES_LIST"
     for vol in $VOLUMES_LIST; do
-        debug "$vol"
+        echo "Volume Entry: $vol"
         hasColon=`echo $vol|grep ":"`
         ## -- allowing change local volume directories --
         if [ "$hasColon" != "" ]; then
             if [ "`echo $vol|grep 'volume-'`" != "" ]; then
                 cutomizedVolume $vol
             else
-                left=`echo $vol|cut -d':' -f1`
-                right=`echo $vol|cut -d':' -f2`
+                ## No Docker volume delcaration using "volume-" as prefix
                 leftHasDot=`echo $left|grep "\./"`
                 if [ "$leftHasDot" != "" ]; then
                     ## has "./data" on the left
@@ -650,7 +648,6 @@ HOSTS_OPTIONS="-v /etc/hosts:/etc/hosts"
 ## ----------------- main --------------------- ##
 ##################################################
 ##################################################
-set -x
 case "${BUILD_TYPE}" in
     0)
         #### 0: (default) has neither X11 nor VNC/noVNC container build image type
@@ -715,5 +712,4 @@ case "${BUILD_TYPE}" in
 
 esac
 
-set +x
 

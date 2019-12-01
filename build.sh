@@ -16,10 +16,19 @@ if [ $# -lt 1 ]; then
     echo "-------------------------------------------------------------------------------------------"
 fi
 
-MY_DIR=$(dirname "$(readlink -f "$0")")
-
 DOCKERFILE=${1:-./Dockerfile}
-DOCKERFILE=$(realpath $DOCKERFILE)
+if [[ "$OSTYPE" == "linux-gnu" ]]; then
+    # Linux
+    MY_DIR=$(dirname "$(readlink -f "$0")")
+    DOCKERFILE=$(realpath $DOCKERFILE)
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    # Mac OSX
+    MY_DIR=`pwd`
+else
+    MY_DIR=`pwd`
+fi
+
+BUILD_CONTEXT=$(dirname ${DOCKERFILE})
 
 imageTag=${2}
 
@@ -28,6 +37,30 @@ if [ $# -gt 2 ]; then
     options="$*"
 else 
     options=""
+fi
+
+##########################################################
+#### ---- Whether to remove previous build cache ---- ####
+#### ---- Valid value: 0 (No remove); 1 (yes, remove)
+##########################################################
+REMOVE_CACHE=0
+
+###############################################################################
+###############################################################################
+###############################################################################
+#### ---- DO NOT Change the code below UNLESS you really want to !!!!) --- ####
+#### ---- DO NOT Change the code below UNLESS you really want to !!!!) --- ####
+#### ---- DO NOT Change the code below UNLESS you really want to !!!!) --- ####
+###############################################################################
+###############################################################################
+###############################################################################
+
+##########################################################
+#### ---- Generate remove cache option if needed ---- ####
+##########################################################
+REMOVE_CACHE_OPTION=""
+if [ ${REMOVE_CACHE} -gt 0 ]; then
+    REMOVE_CACHE_OPTION="--no-cache --rm"
 fi
 
 ###################################################
@@ -85,12 +118,14 @@ BUILD_ARGS="--build-arg BUILD_DATE=${BUILD_DATE} --build-arg VCS_REF=${VCS_REF}"
 
 ## -- ignore entries start with "#" symbol --
 function generateBuildArgs() {
-    for r in `cat ${DOCKER_ENV_FILE} | grep -v '^#'`; do
-        echo "entry=> $r"
-        key=`echo $r | tr -d ' ' | cut -d'=' -f1`
-        value=`echo $r | tr -d ' ' | cut -d'=' -f2`
-        BUILD_ARGS="${BUILD_ARGS} --build-arg $key=$value"
-    done
+    if [ "${DOCKER_ENV_FILE}" != "" ] && [ -s "${DOCKER_ENV_FILE}" ]; then
+        for r in `cat ${DOCKER_ENV_FILE} | grep -v '^#'`; do
+            echo "entry=> $r"
+            key=`echo $r | tr -d ' ' | cut -d'=' -f1`
+            value=`echo $r | tr -d ' ' | cut -d'=' -f2`
+            BUILD_ARGS="${BUILD_ARGS} --build-arg $key=$value"
+        done
+    fi
 }
 generateBuildArgs
 echo "BUILD_ARGS=${BUILD_ARGS}"
@@ -115,30 +150,36 @@ function generateProxyArgs() {
         PROXY_PARAM="${PROXY_PARAM} --build-arg NO_PROXY=\"${NO_PROXY}\""
     fi
     if [ "${http_proxy}" != "" ]; then
-        PROXY_PARAM="${PROXY_PARAM} --build-arg HTTP_PROXY=${http_proxy}"
+        PROXY_PARAM="${PROXY_PARAM} --build-arg http_proxy=${http_proxy}"
     fi
     if [ "${https_proxy}" != "" ]; then
-        PROXY_PARAM="${PROXY_PARAM} --build-arg HTTPS_PROXY=${https_proxy}"
+        PROXY_PARAM="${PROXY_PARAM} --build-arg https_proxy=${https_proxy}"
     fi
     if [ "${no_proxy}" != "" ]; then
-        PROXY_PARAM="${PROXY_PARAM} --build-arg NO_PROXY=\"${no_proxy}\""
+        PROXY_PARAM="${PROXY_PARAM} --build-arg no_proxy=\"${no_proxy}\""
     fi
     BUILD_ARGS="${BUILD_ARGS} ${PROXY_PARAM}"
 }
 generateProxyArgs
-echo "BUILD_ARGS=> ${BUILD_ARGS}"
+echo -e "BUILD_ARGS=> \n ${BUILD_ARGS}"
+echo
 
 ###################################################
-#### ---- Build Container ----
+#### ----------- Build Container ------------ #####
 ###################################################
 
+cd ${BUILD_CONTEXT}
 set -x
-echo "========> imageTag: ${imageTag}"
-docker build --rm -t ${imageTag} \
+sudo docker build ${REMOVE_CACHE_OPTION} -t ${imageTag} \
     ${BUILD_ARGS} \
     ${options} \
-    -f ${DOCKERFILE} .
+    -f $(basename ${DOCKERFILE}) .
 set +x
+cd -
+
+###################################################
+#### --------- More Guides for Users -------- #####
+###################################################
 
 echo "----> Shell into the Container in interactive mode: "
 echo "  docker exec -it --name <some-name> /bin/bash"
@@ -159,5 +200,5 @@ echo "----> Build Docker Images again: "
 echo "To build again: (there is a dot at the end of the command!)"
 echo "  docker build -t ${imageTag} . "
 echo
-docker images |grep "$imageTag"
+sudo docker images |grep "$imageTag"
 

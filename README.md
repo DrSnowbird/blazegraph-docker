@@ -1,10 +1,6 @@
-# BlazeGraph Server 2.1.4 + Java 8 (1.8.0_201) JDK + Maven 3.6 + Python 3.5 + pip v19 + + node v11 + npm 6 + Gradle 5
+# BlazeGraph Server 2.1.5 + Java 8 (1.8.0_222) JDK + Maven 3.6 + Python 3.6 + pip v19 + + node v12 + npm 6 + Gradle 5
 
 [![](https://images.microbadger.com/badges/image/openkbs/blazegraph-docker.svg)](https://microbadger.com/images/openkbs/blazegraph-docker "Get your own image badge on microbadger.com") [![](https://images.microbadger.com/badges/version/openkbs/blazegraph-docker.svg)](https://microbadger.com/images/openkbs/blazegraph-docker "Get your own version badge on microbadger.com")
-
-# License Agreement
-By using this image, you agree the [Oracle Java JDK License](http://www.oracle.com/technetwork/java/javase/terms/license/index.html).
-This image contains [Oracle JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html). You must accept the [Oracle Binary Code License Agreement for Java SE](http://www.oracle.com/technetwork/java/javase/terms/license/index.html) to use this image.
 
 # Use Cases
 This Blazegraph server is aiming for deployment over Container Cluster Platform such as Kubernetes, OpenShift, or other similar ones comparing to other light version of [openkbs/blazegrapy](https://hub.docker.com/r/openkbs/blazegraph-docker). In all, this implementation supports the following deployment uses:
@@ -19,15 +15,20 @@ This Blazegraph server is aiming for deployment over Container Cluster Platform 
   For production deployment, we recommend to remove sudo access inside container and other vulnerability codes. At this point, we are still relative relaxing in not fully locking down security yet.
 
 # Components
-* [BlazeGraph](https://www.blazegraph.com/) 2.1.4 service will be running at http://<server_ip:9999>/
-* java version "1.8.0_201"
-  Java(TM) SE Runtime Environment (build 1.8.0_201-b09)
-  Java HotSpot(TM) 64-Bit Server VM (build 25.201-b09, mixed mode)
-* Apache Maven 3.6.0
-* Python 3.5.2 + pip v19
-* node v11.7.0 + npm 6.5.0 (from NodeSource official Node Distribution)
-* Gradle 5.1* Gradle 5.1
+* [BlazeGraph](https://www.blazegraph.com/) 2.1.5 service will be running at http://<server_ip:9999>/
+* java version "1.8.0_222"
+openjdk version "1.8.0_222"
+OpenJDK Runtime Environment (build 1.8.0_222-8u222-b10-1ubuntu1~18.04.1-b10)
+OpenJDK 64-Bit Server VM (build 25.222-b10, mixed mode)
+* Apache Maven 3.6.7
+* Python 3.6 + pip v19
+* node v12 + npm 6 (from NodeSource official Node Distribution)
+* Gradle 5
 * Other tools: git wget unzip vim python python-setuptools python-dev pandas python-numpy 
+
+# Persistence
+1. Using 'docker-compose up -d' will use Docker's volume to persist across multiple delete/create Docker container unless you change the volume name in 'docker-compose.yaml' file. Or, you intentionally use 'docker-compose down -v' to remove the volume and you will lost your previous data stored using Blazegraph.
+2. Using 'run.sh' will use the same Docker's volume as using 'docker-compose.yaml' since both of them using the same volume name.
 
 # Run (recommended for easy-start)
 Image is pulling from openkbs/blazegraph
@@ -217,70 +218,72 @@ it will work the same way as your local installed Java's "javac" and "java" comm
 
 # Releases information
 ```
-blzg@97a466ff6337:/var/lib/blazegraph$ /usr/printVersions.sh 
-+ echo JAVA_HOME=/usr/java
-JAVA_HOME=/usr/java
+blzg@c75571eddca3:/var/lib/blazegraph$ /usr/scripts/printVersions.sh 
++ echo JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 + java -version
-java version "1.8.0_201"
-Java(TM) SE Runtime Environment (build 1.8.0_201-b09)
-Java HotSpot(TM) 64-Bit Server VM (build 25.201-b09, mixed mode)
+openjdk version "1.8.0_222"
+OpenJDK Runtime Environment (build 1.8.0_222-8u222-b10-1ubuntu1~18.04.1-b10)
+OpenJDK 64-Bit Server VM (build 25.222-b10, mixed mode)
 + mvn --version
-Apache Maven 3.6.0 (97c98ec64a1fdfee7767ce5ffb20918da4f719f3; 2018-10-24T18:41:47Z)
-Maven home: /usr/apache-maven-3.6.0
-Java version: 1.8.0_201, vendor: Oracle Corporation, runtime: /usr/jdk1.8.0_201/jre
-Default locale: en_US, platform encoding: ANSI_X3.4-1968
-OS name: "linux", version: "4.15.0-43-generic", arch: "amd64", family: "unix"
+Apache Maven 3.6.2 (40f52333136460af0dc0d7232c0dc0bcf0d9e117; 2019-08-27T15:06:16Z)
+Maven home: /usr/apache-maven-3.6.2
+Java version: 1.8.0_222, vendor: Private Build, runtime: /usr/lib/jvm/java-8-openjdk-amd64/jre
+Default locale: en, platform encoding: UTF-8
+OS name: "linux", version: "5.0.0-36-generic", arch: "amd64", family: "unix"
 + python -V
-Python 2.7.12
+Python 2.7.15rc1
 + python3 -V
-Python 3.5.2
+Python 3.6.7
 + pip --version
-pip 19.0.1 from /usr/local/lib/python3.5/dist-packages/pip (python 3.5)
+pip 19.3.1 from /usr/local/lib/python3.6/dist-packages/pip (python 3.6)
 + pip3 --version
-pip 19.0.1 from /usr/local/lib/python3.5/dist-packages/pip (python 3.5)
+pip 19.3.1 from /usr/local/lib/python3.6/dist-packages/pip (python 3.6)
 + gradle --version
 
-Welcome to Gradle 5.1.1!
+Welcome to Gradle 5.6.2!
 
 Here are the highlights of this release:
- - Control which dependencies can be retrieved from which repositories
- - Production-ready configuration avoidance APIs
+ - Incremental Groovy compilation
+ - Groovy compile avoidance
+ - Test fixtures for Java projects
+ - Manage plugin versions via settings script
 
-For more details see https://docs.gradle.org/5.1.1/release-notes.html
+For more details see https://docs.gradle.org/5.6.2/release-notes.html
 
 
 ------------------------------------------------------------
-Gradle 5.1.1
+Gradle 5.6.2
 ------------------------------------------------------------
 
-Build time:   2019-01-10 23:05:02 UTC
-Revision:     3c9abb645fb83932c44e8610642393ad62116807
+Build time:   2019-09-05 16:13:54 UTC
+Revision:     55a5e53d855db8fc7b0e494412fc624051a8e781
 
-Kotlin DSL:   1.1.1
-Kotlin:       1.3.11
+Kotlin:       1.3.41
 Groovy:       2.5.4
-Ant:          Apache Ant(TM) version 1.9.13 compiled on July 10 2018
-JVM:          1.8.0_201 (Oracle Corporation 25.201-b09)
-OS:           Linux 4.15.0-43-generic amd64
+Ant:          Apache Ant(TM) version 1.9.14 compiled on March 12 2019
+JVM:          1.8.0_222 (Private Build 25.222-b10)
+OS:           Linux 5.0.0-36-generic amd64
 
 + npm -v
-6.5.0
+6.12.0
 + node -v
-v11.8.0
+v12.13.0
 + cat /etc/lsb-release /etc/os-release
 DISTRIB_ID=Ubuntu
-DISTRIB_RELEASE=16.04
-DISTRIB_CODENAME=xenial
-DISTRIB_DESCRIPTION="Ubuntu 16.04.3 LTS"
+DISTRIB_RELEASE=18.04
+DISTRIB_CODENAME=bionic
+DISTRIB_DESCRIPTION="Ubuntu 18.04.2 LTS"
 NAME="Ubuntu"
-VERSION="16.04.3 LTS (Xenial Xerus)"
+VERSION="18.04.2 LTS (Bionic Beaver)"
 ID=ubuntu
 ID_LIKE=debian
-PRETTY_NAME="Ubuntu 16.04.3 LTS"
-VERSION_ID="16.04"
-HOME_URL="http://www.ubuntu.com/"
-SUPPORT_URL="http://help.ubuntu.com/"
-BUG_REPORT_URL="http://bugs.launchpad.net/ubuntu/"
-VERSION_CODENAME=xenial
-UBUNTU_CODENAME=xenial
+PRETTY_NAME="Ubuntu 18.04.2 LTS"
+VERSION_ID="18.04"
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+VERSION_CODENAME=bionic
+UBUNTU_CODENAME=bionic
 ```

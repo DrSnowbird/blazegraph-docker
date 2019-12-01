@@ -38,7 +38,7 @@ ENV PRODUCT_FULL_PATH_EXE=${PRODUCT_FULL_PATH_EXE:-${PRODUCT_HOME}/bin/${PRODUCT
 #ARG PRODUCT_RELEASE=${PRODUCT_RELEASE:-}
 
 ## -- 3.) Product Version: -- ##
-ARG PRODUCT_VERSION=${PRODUCT_VERSION:-2.1.4}
+ARG PRODUCT_VERSION=${PRODUCT_VERSION:-2.1.5}
 ENV PRODUCT_VERSION=${PRODUCT_VERSION}
 
 ## -- 4.) Product Download Mirror site: -- ##
@@ -54,7 +54,7 @@ ARG PRODUCT_PORTS=${PRODUCT_PORTS:-9999}
 ENV PRODUCT_PORTS=${PRODUCT_PORTS}
 
 ## -- 6.) Product Data and Workspace: -- ##
-ARG PRODUCT_DATA=${PRODUCT_DATA:-${HOME}/data}
+ARG PRODUCT_DATA=${PRODUCT_DATA:-${PRODUCT_HOME}/blazegraph/data}
 ENV PRODUCT_DATA=${PRODUCT_DATA}
 ARG PRODUCT_WORKSPACE=${PRODUCT_WORKSPACE:-${HOME}/workspace}
 ENV PRODUCT_WORKSPACE=${PRODUCT_WORKSPACE:-${HOME}/workspace}
@@ -110,16 +110,15 @@ ARG PRODUCT_DOWNLOAD_ROUTE=${PRODUCT_DOWNLOAD_ROUTE:-${PRODUCT_PROVIDER}/${PRODU
 ## -- Product Download full URL: -- ##
 ARG PRODUCT_DOWNLOAD_URL=${PRODUCT_DOWNLOAD_URL:-${PRODUCT_MIRROR_SITE_URL}/${PRODUCT_DOWNLOAD_ROUTE}}
 
+user root
 WORKDIR ${PRODUCT_INSTALL_ROOT_DIR}
 
-RUN \
-    wget -c --no-check-certificate ${PRODUCT_DOWNLOAD_URL}/${PRODUCT_TAR} && \
+RUN wget -c -q --no-check-certificate ${PRODUCT_DOWNLOAD_URL}/${PRODUCT_TAR} && \
     tar xvf ${PRODUCT_TAR} && \
     mv ${PRODUCT_NAME}-tgz-${PRODUCT_VERSION} ${PRODUCT_NAME} && \
     rm -f ${PRODUCT_TAR} 
 
-RUN \
-    mv ${BIGDATA_PROPERTY} ${BIGDATA_PROPERTY}.ORIG && \
+RUN mv ${BIGDATA_PROPERTY} ${BIGDATA_PROPERTY}.ORIG && \
     ## (not exist yet) mv war/WEB-INF/GraphStore.properties /war/WEB-INF/GraphStore.properties && \
     ## (not exist yet) mv war/WEB-INF/RWStore.properties war/WEB-INF/RWStore.properties.OIRG && \
     ## (not exist yet) mv ${BLZG_HOME}/war/WEB-INF/classes/RWStore.properties ${BLZG_HOME}/war/WEB-INF/classes/RWStore.properties.ORIG && \
@@ -155,11 +154,11 @@ COPY ./docker-entrypoint.sh /
 ENV USER_NAME=blzg
 ENV HOME=/home/${USER_NAME}
 
-ARG USER_ID=${USER_ID:-1000}
-ENV USER_ID=${USER_ID}
+ARG USER_ID=1001
+ENV USER_ID=1001
 
-ARG GROUP_ID=${GROUP_ID:-1000}
-ENV GROUP_ID=${GROUP_ID}
+ARG GROUP_ID=1001
+ENV GROUP_ID=1001
 
 RUN groupadd -g ${GROUP_ID} ${USER_NAME} && \
     useradd -d ${HOME} -s /bin/bash -u ${USER_ID} -g ${USER_NAME} ${USER_NAME} && \
@@ -172,7 +171,7 @@ RUN groupadd -g ${GROUP_ID} ${USER_NAME} && \
 #### --------------------------------- 
 ARG PRODUCT_PROFILE=${PRODUCT_PROFILE:-${HOME}/.${PRODUCT_NAME}-${PRODUCT_VERSION}}
 
-RUN mkdir -p ${PRODUCT_WORKSPACE} ${PRODUCT_PROFILE} ${PRODUCT_DATA} ${DATA_DIR} && \
+RUN mkdir -p ${PRODUCT_WORKSPACE} ${PRODUCT_PROFILE} ${DATA_DIR} && \
     chown -R ${USER_NAME}:${USER_NAME} ${BLZG_HOME} ${HOME} /docker-entrypoint.sh && \
     chmod -R 0755 ${BLZG_HOME} && \
     chmod -R 0777 ${BLZG_HOME}/log && \
