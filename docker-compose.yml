@@ -33,5 +33,5 @@ services:
   
 volumes:
   blazegraph_data:
-    driver_options
+
 
