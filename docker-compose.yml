@@ -25,6 +25,7 @@ services:
       #- $PWD/conf:/usr/blazegraph/conf
       - $PWD/.java:/home/developer/.java 
       - $PWD/.profile:/.profile
+    restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9999"]
       interval: 3s
