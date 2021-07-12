@@ -33,7 +33,52 @@ BUILD_TYPE=0
 ##       ==> Usually, when not in debugging mode anymore, then use 1 as choice.
 ##       ==> Or, your frequent needs of the container for DEV environment Use.
 ## ------------------------------------------------------------------------
-RUN_TYPE=0
+if [ "$1" = "-d" ]; then
+    RUN_TYPE=1
+    shift 1
+fi
+RUN_TYPE=${RUN_TYPE:-0}
+
+########################################
+#### ---- NVIDIA GPU Checking: ---- ####
+########################################
+## ------------------------------------------------------------------------
+## Run with GPU or not
+##    0: (default) Not using host's USER / GROUP ID
+##    1: Yes, using host's USER / GROUP ID for Container running.
+## ------------------------------------------------------------------------ 
+
+NVIDIA_DOCKER_AVAILABLE=0
+function check_NVIDIA() {
+    NVIDIA_PCI=`lspci | grep VGA | grep -i NVIDIA`
+    if [ "$NVIDIA_PCI" == "" ]; then
+        echo "---- No Nvidia PCI found! No Nvidia/GPU physical card(s) available! Use CPU only!"
+        GPU_OPTION=
+    else
+        which nvidia-smi
+        if [ $? -ne 0 ]; then
+            echo "---- No nvidia-smi command! No Nvidia/GPU driver setup! Use CPU only!"
+            GPU_OPTION=
+        else
+            NVIDIA_SMI=`nvidia-smi | grep -i NVIDIA | grep -i CUDA`
+            if [ "$NVIDIA_SMI" == "" ]; then
+                echo "---- No nvidia-smi command not function correctly. Use CPU only!"
+                GPU_OPTION=
+            else
+                echo ">>>> Found Nvidia GPU: Use all GPU(s)!"
+                echo "${NVIDIA_SMI}"
+                GPU_OPTION=" --gpus all "
+            fi
+            if [ ${IS_TO_RUN_CPU} -gt 0 ]; then
+                GPU_OPTION=
+            fi
+        fi
+    fi
+}
+#check_NVIDIA
+#echo "GPU_OPTION= ${GPU_OPTION}"
+
+#echo "$@"
 
 ## ------------------------------------------------------------------------
 ## Change to one (1) if run.sh needs to use host's user/group to run the Container
@@ -47,8 +92,11 @@ USER_VARS_NEEDED=0
 ## Valid "RESTART_OPTION" values:
 ##  { no, on-failure, unless-stopped, always }
 ## ------------------------------------------------------------------------
-RESTART_OPTION=no
-#RESTART_OPTION=unless-stopped
+if [ "$1" = "-a" ] && [ "${RUN_TYPE}" = "1" ] ; then
+    RESTART_OPTION=always
+    shift 1
+fi
+RESTART_OPTION=${RESTART_OPTION:-no}
 
 ## ------------------------------------------------------------------------
 ## More optional values:
@@ -145,9 +193,30 @@ ORGANIZATION=openkbs
 baseDataFolder="$HOME/data-docker"
 
 ###################################################
+#### ---- Detect Host OS Type and minor Tweek: ----
+###################################################
+SED_MAC_FIX="''"
+CP_OPTION="--backup=numbered"
+HOST_IP=127.0.0.1
+function get_HOST_IP() {
+    if [[ "$OSTYPE" == "linux-gnu" ]]; then
+        # Linux ...
+        HOST_IP=`ip route get 1|grep via | awk '{print $7}' `
+        SED_MAC_FIX=
+    elif [[ $OSTYPE == darwin* ]]; then
+        # Mac OSX
+        HOST_IP=`ifconfig | grep "inet " | grep -Fv 127.0.0.1 | grep -Fv 192.168 | awk '{print $2}'`
+        CP_OPTION=
+    fi
+    echo "HOST_IP=${HOST_IP}"
+}
+get_HOST_IP
+MY_IP=${HOST_IP}
+
+###################################################
 #### **** Container package information ****
 ###################################################
-MY_IP=` hostname -I|awk '{print $1}'`
+#MY_IP=`hostname -I|awk '{print $1}'`
 DOCKER_IMAGE_REPO=`echo $(basename $PWD)|tr '[:upper:]' '[:lower:]'|tr "/: " "_" `
 imageTag="${ORGANIZATION}/${DOCKER_IMAGE_REPO}"
 #PACKAGE=`echo ${imageTag##*/}|tr "/\-: " "_"`
@@ -262,6 +331,17 @@ function cutomizedVolume() {
     fi
 }
 
+function checkHostVolumePath() {
+    _left=$1
+    mkdir -p ${_left}
+    sudo chown -R $USER:$USER ${_left}
+    if [ -s ${_left} ]; then 
+        ls -al ${_left}
+    else 
+        echo "*** ERROR: ${_left}: Not existing!"
+    fi
+}
+
 function generateVolumeMapping() {
     if [ "$VOLUMES_LIST" == "" ]; then
         ## -- If locally defined in this file, then respect that first.
@@ -269,57 +349,60 @@ function generateVolumeMapping() {
         VOLUMES_LIST=`cat ${DOCKER_ENV_FILE}|grep "^#VOLUMES_LIST= *"|sed "s/[#\"]//g"|cut -d'=' -f2-`
     fi
     for vol in $VOLUMES_LIST; do
-        debug "$vol"
+        echo
+        echo ">>>>>>>>> $vol"
         hasColon=`echo $vol|grep ":"`
         ## -- allowing change local volume directories --
         if [ "$hasColon" != "" ]; then
             if [ "`echo $vol|grep 'volume-'`" != "" ]; then
                 cutomizedVolume $vol
             else
+                echo "************* hasColon=$hasColon"
                 left=`echo $vol|cut -d':' -f1`
                 right=`echo $vol|cut -d':' -f2`
-                leftHasDot=`echo $left|grep "\./"`
+                leftHasDot=`echo $left|grep "^\./"`
                 if [ "$leftHasDot" != "" ]; then
                     ## has "./data" on the left
+                    debug "******** A. Left HAS Dot pattern: leftHasDot=$leftHasDot"
                     if [[ ${right} == "/"* ]]; then
                         ## -- pattern like: "./data:/containerPath/data"
-                        debug "-- pattern like ./data:/data --"
-                        VOLUME_MAP="${VOLUME_MAP} -v `pwd`/${left}:${right}"
+                        echo "******* A-1 -- pattern like ./data:/data --"
+                        VOLUME_MAP="${VOLUME_MAP} -v `pwd`/${left#./}:${right}"
                     else
                         ## -- pattern like: "./data:data"
-                        debug "-- pattern like ./data:data --"
-                        VOLUME_MAP="${VOLUME_MAP} -v `pwd`/${left}:${DOCKER_VOLUME_DIR}/${right}"
+                        echo "******* A-2 -- pattern like ./data:data --"
+                        VOLUME_MAP="${VOLUME_MAP} -v `pwd`/${left#./}:${DOCKER_VOLUME_DIR}/${right}"
                     fi
-                    mkdir -p `pwd`/${left}
-                    if [ $DEBUG -gt 0 ]; then ls -al `pwd`/${left}; fi
+                    checkHostVolumePath "`pwd`/${left}"
                 else
                     ## No "./data" on the left
+                    debug "******** B. Left  No ./data on the left: leftHasDot=$leftHasDot"
+                    leftHasAbsPath=`echo $left|grep "^/.*"`
                     if [ "$leftHasAbsPath" != "" ]; then
-                        ## Has pattern like "/data" on the left
+                        debug "******* B-1 ## Has pattern like /data on the left "
                         if [[ ${right} == "/"* ]]; then
                             ## -- pattern like: "/data:/containerPath/data"
-                            debug "-- pattern like /data:/containerPath/data --"
+                            echo "****** B-1-a pattern like /data:/containerPath/data --"
                             VOLUME_MAP="${VOLUME_MAP} -v ${left}:${right}"
                         else
                             ## -- pattern like: "/data:data"
-                            debug "-- pattern like /data:data --"
+                            echo "----- B-1-b pattern like /data:data --"
                             VOLUME_MAP="${VOLUME_MAP} -v ${left}:${DOCKER_VOLUME_DIR}/${right}"
                         fi
-                        mkdir -p ${LOCAL_VOLUME_DIR}/${left}
-                        if [ $DEBUG -gt 0 ]; then ls -al ${LOCAL_VOLUME_DIR}/${left}; fi
+                        checkHostVolumePath "${left}"
                     else
-                        ## No pattern like "/data" on the left
+                        debug "******* B-2 ## No pattern like /data on the left"
+                        rightHasAbsPath=`echo $right|grep "^/.*"`
+                        debug ">>>>>>>>>>>>> rightHasAbsPath=$rightHasAbsPath"
                         if [[ ${right} == "/"* ]]; then
-                            ## -- pattern like: "data:/containerPath/data"
+                            echo "****** B-2-a pattern like: data:/containerPath/data"
                             debug "-- pattern like ./data:/data --"
                             VOLUME_MAP="${VOLUME_MAP} -v ${LOCAL_VOLUME_DIR}/${left}:${right}"
                         else
-                            ## -- pattern like: "data:data"
-                            debug "-- pattern like data:data --"
+                            debug "****** B-2-b ## -- pattern like: data:data"
                             VOLUME_MAP="${VOLUME_MAP} -v ${LOCAL_VOLUME_DIR}/${left}:${DOCKER_VOLUME_DIR}/${right}"
                         fi
-                        mkdir -p ${LOCAL_VOLUME_DIR}/${left}
-                        if [ $DEBUG -gt 0 ]; then ls -al ${LOCAL_VOLUME_DIR}/${left}; fi
+                        checkHostVolumePath "${left}"
                     fi
                 fi
             fi
@@ -329,7 +412,8 @@ function generateVolumeMapping() {
             VOLUME_MAP="${VOLUME_MAP} -v ${LOCAL_VOLUME_DIR}/$vol:${DOCKER_VOLUME_DIR}/$vol"
             mkdir -p ${LOCAL_VOLUME_DIR}/$vol
             if [ $DEBUG -gt 0 ]; then ls -al ${LOCAL_VOLUME_DIR}/$vol; fi
-        fi
+        fi       
+        echo ">>> expanded VOLUME_MAP: ${VOLUME_MAP}"
     done
 }
 #### ---- Generate Volumes Mapping ----
@@ -492,8 +576,10 @@ echo ${privilegedString}
 #### ---- Mostly, you don't need change below ----
 ###################################################
 function cleanup() {
-    if [ ! "`sudo docker ps -a|grep ${instanceName}`" == "" ]; then
-         sudo docker rm -f ${instanceName}
+    containerID=`sudo docker ps -a|grep "${instanceName}" | awk '{print $1}'`
+    # if [ ! "`sudo docker ps -a|grep ${instanceName}`" == "" ]; then
+    if [ "${containerID}" != "" ]; then
+         sudo docker rm -f ${containerID}
     fi
 }
 
@@ -584,7 +670,22 @@ echo "  ./commit.sh: to push the container image to docker hub"
 echo "--------------------------------------------------------"
 
 #################################
-## ---- Setup X11 Display -_-- ##
+## ---- Detect Media/Sound: -- ##
+#################################
+MEDIA_OPTIONS="--group-add audio "
+#            --device /dev/snd:/dev/snd \
+function detectMedia() {
+    if [ "$1" != "" ]; then
+        if [ -s $1 ]; then
+            # --device /dev/snd:/dev/snd
+            MEDIA_OPTIONS="${MEDIA_OPTIONS} --device $1:$1"
+            echo "MEDIA_OPTIONS= ${MEDIA_OPTION}"
+        fi
+    fi
+}
+
+#################################
+## -_-- Setup X11 Display -_-- ##
 #################################
 X11_OPTION=
 function setupDisplayType() {
@@ -592,15 +693,19 @@ function setupDisplayType() {
         # ...
         xhost +SI:localuser:$(id -un) 
         xhost + 127.0.0.1
+        detectMedia "/dev/snd"
         echo ${DISPLAY}
     elif [[ "$OSTYPE" == "darwin"* ]]; then
         # Mac OSX
+        # if you want to multi-media, you need customize it here
+        MEDIA_OPTIONS=
         xhost + 127.0.0.1
         export DISPLAY=host.docker.internal:0
         echo ${DISPLAY}
     elif [[ "$OSTYPE" == "cygwin" ]]; then
         # POSIX compatibility layer and Linux environment emulation for Windows
         xhost + 127.0.0.1
+        detectMedia "/dev/snd"
         echo ${DISPLAY}
     elif [[ "$OSTYPE" == "msys" ]]; then
         # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
@@ -609,6 +714,7 @@ function setupDisplayType() {
     elif [[ "$OSTYPE" == "freebsd"* ]]; then
         # ...
         xhost + 127.0.0.1
+        detectMedia "/dev/snd"
         echo ${DISPLAY}
     else
         # Unknown.
@@ -645,12 +751,14 @@ setupCorporateCertificates
 # ------------------------------------------------
 HOSTS_OPTIONS="-v /etc/hosts:/etc/hosts"
 
+
 ##################################################
 ##################################################
 ## ----------------- main --------------------- ##
 ##################################################
 ##################################################
 set -x
+
 case "${BUILD_TYPE}" in
     0)
         #### 0: (default) has neither X11 nor VNC/noVNC container build image type
@@ -665,29 +773,32 @@ case "${BUILD_TYPE}" in
             ${ENV_VARS} \
             ${VOLUME_MAP} \
             ${PORT_MAP} \
-            $* \
-            ${imageTag}
+            ${imageTag} \
+            $@
         ;;
     1)
         #### 1: X11/Desktip container build image type
         #### ---- for X11-based ---- #### 
         setupDisplayType
         echo ${DISPLAY}
-        X11_OPTION="-e DISPLAY=$DISPLAY -v $HOME/.chrome:/data -v /dev/shm:/dev/shm -v /tmp/.X11-unix:/tmp/.X11-unix"
+        #X11_OPTION="-e DISPLAY=$DISPLAY -v $HOME/.chrome:/data -v /dev/shm:/dev/shm -v /tmp/.X11-unix:/tmp/.X11-unix -e DBUS_SYSTEM_BUS_ADDRESS=unix:path=/host/run/dbus/system_bus_socket"
+        #X11_OPTION="-e DISPLAY=$DISPLAY -v /dev/shm:/dev/shm -v /tmp/.X11-unix:/tmp/.X11-unix -e DBUS_SYSTEM_BUS_ADDRESS=unix:path=/var/run/dbus/system_bus_socket"
+        X11_OPTION="-e DISPLAY=$DISPLAY -v /dev/shm:/dev/shm -v /tmp/.X11-unix:/tmp/.X11-unix"
         echo "X11_OPTION=${X11_OPTION}"
         MORE_OPTIONS="${MORE_OPTIONS} ${HOSTS_OPTIONS} "
         sudo docker run \
             --name=${instanceName} \
             --restart=${RESTART_OPTION} \
+            ${MEDIA_OPTIONS} \
             ${REMOVE_OPTION} ${RUN_OPTION} ${MORE_OPTIONS} ${CERTIFICATE_OPTIONS} \
-            ${X11_OPTION} ${MEDIA_OPTIONS} \
+            ${X11_OPTION} \
             ${privilegedString} \
             ${USER_VARS} \
             ${ENV_VARS} \
             ${VOLUME_MAP} \
             ${PORT_MAP} \
-            $* \
-            ${imageTag}
+            ${imageTag} \
+            $@
         ;;
     2)
         #### 2: VNC/noVNC container build image type
@@ -709,11 +820,10 @@ case "${BUILD_TYPE}" in
             ${ENV_VARS} \
             ${VOLUME_MAP} \
             ${PORT_MAP} \
-            $* \
-            ${imageTag}
+            ${imageTag} \
+            $@
         ;;
 
 esac
 
-set +x
 
