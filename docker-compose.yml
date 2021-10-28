@@ -11,7 +11,7 @@ services:
       - GROUP_ID=${GROUP_ID:-1001}
       - JVM_MEM=2g
     env_file:
-      - ./docker.env
+      - ./.env
     ports:
       - 9999:9999
     volumes:

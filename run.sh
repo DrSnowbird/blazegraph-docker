@@ -14,6 +14,79 @@ if [ $# -lt 1 ]; then
     echo "--------------------------------------------------------"
 fi
 
+###################################################
+#### ---- Parse Command Line Arguments:  ---- #####
+###################################################
+IS_TO_RUN_CPU=0
+IS_TO_RUN_GPU=1
+
+
+RESTART_OPTION_VALUES=" no on-failure unless-stopped always "
+RESTART_OPTION=${RESTART_OPTION:-no}
+
+## ------------------------------------------------------------------------
+## "RUN_OPTION" values: 
+##    "-it" : (default) Interactive Container -
+##       ==> Best for Debugging Use
+##    "-d" : Detach Container / Non-Interactive 
+##       ==> Usually, when not in debugging mode anymore, then use 1 as choice.
+##       ==> Or, your frequent needs of the container for DEV environment Use.
+## ------------------------------------------------------------------------
+RUN_OPTION=${RUN_OPTION:-" -it "}
+
+PARAMS=""
+while (( "$#" )); do
+  case "$1" in
+    -c|--cpu)
+      IS_TO_RUN_CPU=1
+      IS_TO_RUN_GPU=0
+      GPU_OPTION=
+      shift
+      ;;
+    -g|--gpu)
+      IS_TO_RUN_CPU=0
+      IS_TO_RUN_GPU=1
+      GPU_OPTION=" --gpus all "
+      shift
+      ;;
+    -d|--detach)
+      RUN_OPTION=" -d "
+      shift
+      ;;
+    -it)
+      RUN_OPTION=" -it "
+      shift
+      ;;
+    -r|--restart)
+      ## Valid "RESTART_OPTION" values:
+      ##  { no, on-failure, unless-stopped, always }
+      if [[ "${RESTART_OPTION_VALUES}" =~ .*" $2 ".* ]]; then
+          RESTART_OPTION=$2
+          shift 2
+      else
+          echo "*** ERROR: -r|--restart options: { no, on-failure, unless-stopped, always }"
+          exit 1
+      fi
+      ;;
+    -*|--*=) # unsupported flags
+      echo "Error: Unsupported flag $1" >&2
+      exit 1
+      ;;
+    *) # preserve positional arguments
+      PARAMS="$PARAMS $1"
+      shift
+      ;;
+  esac
+done
+# set positional arguments in their proper place
+eval set -- "$PARAMS"
+
+echo "-c (IS_TO_RUN_CPU): $IS_TO_RUN_CPU"
+echo "-g (IS_TO_RUN_GPU): $IS_TO_RUN_GPU"
+
+echo "remiaing args:"
+echo $*
+
 ###########################################################################
 #### ---- RUN Configuration (CHANGE THESE if needed!!!!)           --- ####
 ###########################################################################
@@ -26,18 +99,12 @@ fi
 BUILD_TYPE=0
 
 ## ------------------------------------------------------------------------
-## Valid "RUN_TYPE" values: 
-##    0: (default) Interactive Container -
-##       ==> Best for Debugging Use
-##    1: Detach Container / Non-Interactive 
-##       ==> Usually, when not in debugging mode anymore, then use 1 as choice.
-##       ==> Or, your frequent needs of the container for DEV environment Use.
+## -- Container 'hostname' use: 
+## -- Default= 1 (use HOST_IP)
+## -- 1: HOST_IP
+## -- 2: HOST_NAME
 ## ------------------------------------------------------------------------
-if [ "$1" = "-d" ]; then
-    RUN_TYPE=1
-    shift 1
-fi
-RUN_TYPE=${RUN_TYPE:-0}
+HOST_USE_IP_OR_NAME=${HOST_USE_IP_OR_NAME:-1}
 
 ########################################
 #### ---- NVIDIA GPU Checking: ---- ####
@@ -75,10 +142,10 @@ function check_NVIDIA() {
         fi
     fi
 }
-#check_NVIDIA
-#echo "GPU_OPTION= ${GPU_OPTION}"
+check_NVIDIA
+echo "GPU_OPTION= ${GPU_OPTION}"
 
-#echo "$@"
+echo "$@"
 
 ## ------------------------------------------------------------------------
 ## Change to one (1) if run.sh needs to use host's user/group to run the Container
@@ -88,30 +155,22 @@ function check_NVIDIA() {
 ## ------------------------------------------------------------------------
 USER_VARS_NEEDED=0
 
-## ------------------------------------------------------------------------
-## Valid "RESTART_OPTION" values:
-##  { no, on-failure, unless-stopped, always }
-## ------------------------------------------------------------------------
-if [ "$1" = "-a" ] && [ "${RUN_TYPE}" = "1" ] ; then
-    RESTART_OPTION=always
-    shift 1
-fi
-RESTART_OPTION=${RESTART_OPTION:-no}
 
 ## ------------------------------------------------------------------------
 ## More optional values:
 ##   Add any additional options here
 ## ------------------------------------------------------------------------
 #MORE_OPTIONS="--privileged=true"
-MORE_OPTIONS=""
+#MORE_OPTIONS="--ipc=host --shm-size 4g"
+MORE_OPTIONS="--ipc=host"
 
 ## ------------------------------------------------------------------------
 ## Multi-media optional values:
 ##   Add any additional options here
 ## ------------------------------------------------------------------------
 #MEDIA_OPTIONS=" --device /dev/snd --device /dev/dri  --device /dev/video0  --group-add audio  --group-add video "
-MEDIA_OPTIONS=" --device /dev/snd --device /dev/dri  --group-add audio  --group-add video "
-#MEDIA_OPTIONS=
+#MEDIA_OPTIONS=" --group-add audio  --group-add video --device /dev/snd --device /dev/dri  "
+MEDIA_OPTIONS=
 
 ###############################################################################
 ###############################################################################
@@ -149,29 +208,6 @@ if [ "${BUILD_TYPE}" -lt 0 ] || [ "${BUILD_TYPE}" -gt 2 ]; then
     exit 1
 fi
 
-########################################
-#### ---- Validate RUN_TYPE    ---- ####
-########################################
- 
-RUN_OPTION=${RUN_OPTION:-" -it "}
-function validateRunType() {
-    case "${RUN_TYPE}" in
-        0 )
-            RUN_OPTION=" -it "
-            ;;
-        1 )
-            RUN_OPTION=" -d "
-            ;;
-        * )
-            echo "**** ERROR: Incorrect RUN_TYPE: ${RUN_TYPE} is used! Abort ****"
-            exit 1
-            ;;
-    esac
-}
-validateRunType
-echo "RUN_TYPE=${RUN_TYPE}"
-echo "RUN_OPTION=${RUN_OPTION}"
-echo "RESTART_OPTION=${RESTART_OPTION}"
 echo "REMOVE_OPTION=${REMOVE_OPTION}"
 
 ###########################################################################
@@ -179,7 +215,7 @@ echo "REMOVE_OPTION=${REMOVE_OPTION}"
 ###########################################################################
 
 ## -- (this script will include ./.env only if "./docker-run.env" not found
-DOCKER_ENV_FILE="./docker-run.env"
+DOCKER_ENV_FILE="./.env"
 
 ###########################################################################
 #### (Optional - to filter Environmental Variables for Running Docker)
@@ -195,28 +231,40 @@ baseDataFolder="$HOME/data-docker"
 ###################################################
 #### ---- Detect Host OS Type and minor Tweek: ----
 ###################################################
+###################################################
+#### **** Container HOST information ****
+###################################################
 SED_MAC_FIX="''"
 CP_OPTION="--backup=numbered"
 HOST_IP=127.0.0.1
+HOST_NAME=localhost
 function get_HOST_IP() {
     if [[ "$OSTYPE" == "linux-gnu" ]]; then
         # Linux ...
-        HOST_IP=`ip route get 1|grep via | awk '{print $7}' `
+        HOST_NAME=`hostname -f`
+        HOST_IP=`ip route get 1|grep via | awk '{print $7}'`
         SED_MAC_FIX=
-    elif [[ $OSTYPE == darwin* ]]; then
+        echo -e ">>>> HOST_IP: ${HOST_IP}"
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
         # Mac OSX
+        HOST_NAME=`hostname -f`
         HOST_IP=`ifconfig | grep "inet " | grep -Fv 127.0.0.1 | grep -Fv 192.168 | awk '{print $2}'`
         CP_OPTION=
+    else
+        HOST_NAME=`hostname -f`
+        echo "**** Unknown/unsupported HOST OS type: $OSTYPE"
+        echo ">>>> Use defaults: HOST_IP=$HOST_IP ; HOST_NAME=$HOST_NAME"
     fi
-    echo "HOST_IP=${HOST_IP}"
+    echo ">>> HOST_IP=${HOST_IP}"
+    echo ">>> HOST_NAME=${HOST_NAME}"
 }
 get_HOST_IP
-MY_IP=${HOST_IP}
+HOST_IP=${HOST_IP:-127.0.0.1}
+HOST_NAME=${HOST_NAME:-localhost}
 
 ###################################################
 #### **** Container package information ****
 ###################################################
-#MY_IP=`hostname -I|awk '{print $1}'`
 DOCKER_IMAGE_REPO=`echo $(basename $PWD)|tr '[:upper:]' '[:lower:]'|tr "/: " "_" `
 imageTag="${ORGANIZATION}/${DOCKER_IMAGE_REPO}"
 #PACKAGE=`echo ${imageTag##*/}|tr "/\-: " "_"`
@@ -404,13 +452,17 @@ function generateVolumeMapping() {
                         fi
                         checkHostVolumePath "${left}"
                     fi
+                    mkdir -p ${LOCAL_VOLUME_DIR}/${left}
+                    if [ $DEBUG -gt 0 ]; then ls -al ${LOCAL_VOLUME_DIR}/${left}; fi
                 fi
             fi
         else
             ## -- pattern like: "data"
             debug "-- default sub-directory (without prefix absolute path) --"
             VOLUME_MAP="${VOLUME_MAP} -v ${LOCAL_VOLUME_DIR}/$vol:${DOCKER_VOLUME_DIR}/$vol"
-            mkdir -p ${LOCAL_VOLUME_DIR}/$vol
+            if [ ! -s ${LOCAL_VOLUME_DIR}/$vol ]; then
+                mkdir -p ${LOCAL_VOLUME_DIR}/$vol
+            fi
             if [ $DEBUG -gt 0 ]; then ls -al ${LOCAL_VOLUME_DIR}/$vol; fi
         fi       
         echo ">>> expanded VOLUME_MAP: ${VOLUME_MAP}"
@@ -449,7 +501,8 @@ echo "PORT_MAP=${PORT_MAP}"
 ###################################################
 #### ---- Generate Environment Variables       ----
 ###################################################
-ENV_VARS=""
+ENV_VARS=
+ENV_APP_RUN_CMD=
 function generateEnvVars_v2() {
     while read line; do
         echo "Line=$line"
@@ -583,14 +636,17 @@ function cleanup() {
     fi
 }
 
+###################################################
+#### ---- Display Host (Container) URL with Port ----
+###################################################
 function displayURL() {
     port=${1}
-    echo "... Go to: http://${MY_IP}:${port}"
-    #firefox http://${MY_IP}:${port} &
+    echo "... Go to: http://${HOST_IP}:${port}"
+    #firefox http://${HOST_IP}:${port} &
     if [ "`which google-chrome`" != "" ]; then
-        /usr/bin/google-chrome http://${MY_IP}:${port} &
+        /usr/bin/google-chrome http://${HOST_IP}:${port} &
     else
-        firefox http://${MY_IP}:${port} &
+        firefox http://${HOST_IP}:${port} &
     fi
 }
 
@@ -672,17 +728,22 @@ echo "--------------------------------------------------------"
 #################################
 ## ---- Detect Media/Sound: -- ##
 #################################
-MEDIA_OPTIONS="--group-add audio "
-#            --device /dev/snd:/dev/snd \
+MEDIA_OPTIONS=""
 function detectMedia() {
-    if [ "$1" != "" ]; then
-        if [ -s $1 ]; then
+    devices="/dev/snd /dev/dri"
+    for device in $devices; do
+        if [ -s $device ]; then
             # --device /dev/snd:/dev/snd
-            MEDIA_OPTIONS="${MEDIA_OPTIONS} --device $1:$1"
-            echo "MEDIA_OPTIONS= ${MEDIA_OPTION}"
+            if [ "${MEDIA_OPTIONS}" == "" ]; then
+                MEDIA_OPTIONS=" --group-add audio --group-add video "
+            fi
+            # MEDIA_OPTIONS=" --group-add audio  --group-add video --device /dev/snd --device /dev/dri  "
+            MEDIA_OPTIONS="${MEDIA_OPTIONS} --device $device:$device"
         fi
-    fi
+    done
+    echo "MEDIA_OPTIONS= ${MEDIA_OPTION}"
 }
+detectMedia
 
 #################################
 ## -_-- Setup X11 Display -_-- ##
@@ -693,19 +754,17 @@ function setupDisplayType() {
         # ...
         xhost +SI:localuser:$(id -un) 
         xhost + 127.0.0.1
-        detectMedia "/dev/snd"
         echo ${DISPLAY}
     elif [[ "$OSTYPE" == "darwin"* ]]; then
         # Mac OSX
-        # if you want to multi-media, you need customize it here
-        MEDIA_OPTIONS=
+        # if you want to multi-media in MacOS, you need customize it here
+        MEDIA_OPTIONS=""
         xhost + 127.0.0.1
         export DISPLAY=host.docker.internal:0
         echo ${DISPLAY}
     elif [[ "$OSTYPE" == "cygwin" ]]; then
         # POSIX compatibility layer and Linux environment emulation for Windows
         xhost + 127.0.0.1
-        detectMedia "/dev/snd"
         echo ${DISPLAY}
     elif [[ "$OSTYPE" == "msys" ]]; then
         # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
@@ -714,7 +773,6 @@ function setupDisplayType() {
     elif [[ "$OSTYPE" == "freebsd"* ]]; then
         # ...
         xhost + 127.0.0.1
-        detectMedia "/dev/snd"
         echo ${DISPLAY}
     else
         # Unknown.
@@ -749,8 +807,12 @@ setupCorporateCertificates
 #  => this might open up more attack surface since
 #   /etc/hosts has other nodes IP/name information
 # ------------------------------------------------
-HOSTS_OPTIONS="-v /etc/hosts:/etc/hosts"
-
+if [ ${HOST_USE_IP_OR_NAME} -eq 2 ]; then
+    HOSTS_OPTIONS="-h ${HOST_NAME} -v /etc/hosts:/etc/hosts "
+else
+    # default use HOST_IP
+    HOSTS_OPTIONS="-h ${HOST_IP} -v /etc/hosts:/etc/hosts "
+fi
 
 ##################################################
 ##################################################
@@ -758,15 +820,16 @@ HOSTS_OPTIONS="-v /etc/hosts:/etc/hosts"
 ##################################################
 ##################################################
 set -x
-
+echo -e ">>> (final) ENV_VARS=${ENV_VARS}"
 case "${BUILD_TYPE}" in
     0)
         #### 0: (default) has neither X11 nor VNC/noVNC container build image type
         #### ---- for headless-based / GUI-less ---- ####
         MORE_OPTIONS="${MORE_OPTIONS} ${HOSTS_OPTIONS} "
-        sudo docker run \
+        docker run \
             --name=${instanceName} \
             --restart=${RESTART_OPTION} \
+            ${GPU_OPTION} \
             ${REMOVE_OPTION} ${RUN_OPTION} ${MORE_OPTIONS} ${CERTIFICATE_OPTIONS} \
             ${privilegedString} \
             ${USER_VARS} \
@@ -786,9 +849,10 @@ case "${BUILD_TYPE}" in
         X11_OPTION="-e DISPLAY=$DISPLAY -v /dev/shm:/dev/shm -v /tmp/.X11-unix:/tmp/.X11-unix"
         echo "X11_OPTION=${X11_OPTION}"
         MORE_OPTIONS="${MORE_OPTIONS} ${HOSTS_OPTIONS} "
-        sudo docker run \
+        docker run \
             --name=${instanceName} \
             --restart=${RESTART_OPTION} \
+            ${GPU_OPTION} \
             ${MEDIA_OPTIONS} \
             ${REMOVE_OPTION} ${RUN_OPTION} ${MORE_OPTIONS} ${CERTIFICATE_OPTIONS} \
             ${X11_OPTION} \
@@ -811,7 +875,7 @@ case "${BUILD_TYPE}" in
             ENV_VARS="${ENV_VARS} -e VNC_RESOLUTION=${VNC_RESOLUTION}" 
         fi
         MORE_OPTIONS="${MORE_OPTIONS} ${HOSTS_OPTIONS} "
-        sudo docker run \
+        docker run \
             --name=${instanceName} \
             --restart=${RESTART_OPTION} \
             ${REMOVE_OPTION} ${RUN_OPTION} ${MORE_OPTIONS} ${CERTIFICATE_OPTIONS} \
