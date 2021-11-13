@@ -1,0 +1,186 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix pizza: <http://www.co-ode.org/ontologies/pizza/pizza.owl#> .
+@base <http://www.w3.org/2002/07/owl#> .
+
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://www.co-ode.org/ontologies/pizza/pizza.owl#hasTopping
+pizza:hasTopping rdf:type owl:ObjectProperty .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://www.co-ode.org/ontologies/pizza/pizza.owl#CaperTopping
+pizza:CaperTopping rdf:type owl:Class .
+
+
+###  http://www.co-ode.org/ontologies/pizza/pizza.owl#InterestingPizza
+pizza:InterestingPizza rdf:type owl:Class ;
+                       owl:equivalentClass [ owl:intersectionOf ( pizza:Pizza
+                                                                  [ rdf:type owl:Restriction ;
+                                                                    owl:onProperty pizza:hasTopping ;
+                                                                    owl:minCardinality "3"^^xsd:nonNegativeInteger
+                                                                  ]
+                                                                ) ;
+                                             rdf:type owl:Class
+                                           ] ;
+                       rdfs:label "PizzaInteressante"@pt .
+
+
+###  http://www.co-ode.org/ontologies/pizza/pizza.owl#JalapenoPepperTopping
+pizza:JalapenoPepperTopping rdf:type owl:Class .
+
+
+###  http://www.co-ode.org/ontologies/pizza/pizza.owl#LeekTopping
+pizza:LeekTopping rdf:type owl:Class .
+
+
+###  http://www.co-ode.org/ontologies/pizza/pizza.owl#MozzarellaTopping
+pizza:MozzarellaTopping rdf:type owl:Class .
+
+
+###  http://www.co-ode.org/ontologies/pizza/pizza.owl#PineKernels
+pizza:PineKernels rdf:type owl:Class .
+
+
+###  http://www.co-ode.org/ontologies/pizza/pizza.owl#Pizza
+pizza:Pizza rdf:type owl:Class .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  http://www.co-ode.org/ontologies/pizza/pizza.owl#marksPeppers
+pizza:marksPeppers rdf:type owl:NamedIndividual ,
+                            pizza:JalapenoPepperTopping ;
+                   rdfs:label "mark's special spicy jalapenos" .
+
+
+###  http://www.co-ode.org/ontologies/pizza/pizza.owl#marksPizzaInstance
+pizza:marksPizzaInstance rdf:type owl:NamedIndividual ,
+                                  pizza:Pizza ;
+                         pizza:hasTopping pizza:marksPeppers ,
+                                          pizza:topping1 ,
+                                          pizza:topping2 ,
+                                          pizza:topping3 ,
+                                          pizza:topping4 ;
+                         rdfs:label "mark's pizza instance" .
+
+
+###  http://www.co-ode.org/ontologies/pizza/pizza.owl#topping1
+pizza:topping1 rdf:type owl:NamedIndividual ,
+                        pizza:MozzarellaTopping ;
+               rdfs:label "mark's semi secret topping one" .
+
+
+###  http://www.co-ode.org/ontologies/pizza/pizza.owl#topping2
+pizza:topping2 rdf:type owl:NamedIndividual ,
+                        pizza:PineKernels ;
+               rdfs:label "mark's semi secret topping two" .
+
+
+###  http://www.co-ode.org/ontologies/pizza/pizza.owl#topping3
+pizza:topping3 rdf:type owl:NamedIndividual ,
+                        pizza:CaperTopping ;
+               rdfs:label "mark's semi secret topping three" .
+
+
+###  http://www.co-ode.org/ontologies/pizza/pizza.owl#topping4
+pizza:topping4 rdf:type owl:NamedIndividual ,
+                        pizza:LeekTopping ;
+               rdfs:label "mark's semi secret topping four" .
+
+
+#################################################################
+#    General axioms
+#################################################################
+
+[ rdf:type owl:AllDifferent ;
+  owl:distinctMembers ( pizza:marksPeppers
+                        pizza:topping1
+                        pizza:topping2
+                        pizza:topping3
+                        pizza:topping4
+                      )
+] .
+
+
+#################################################################
+#    Rules
+#################################################################
+
+<urn:swrl#x> rdf:type <http://www.w3.org/2003/11/swrl#Variable> .
+
+<urn:swrl#y1> rdf:type <http://www.w3.org/2003/11/swrl#Variable> .
+
+<urn:swrl#y2> rdf:type <http://www.w3.org/2003/11/swrl#Variable> .
+
+<urn:swrl#y3> rdf:type <http://www.w3.org/2003/11/swrl#Variable> .
+
+[ rdf:type <http://www.w3.org/2003/11/swrl#Imp> ;
+   <http://www.w3.org/2003/11/swrl#body> [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                           rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#ClassAtom> ;
+                                                       <http://www.w3.org/2003/11/swrl#classPredicate> pizza:Pizza ;
+                                                       <http://www.w3.org/2003/11/swrl#argument1> <urn:swrl#x>
+                                                     ] ;
+                                           rdf:rest [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                                      rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#IndividualPropertyAtom> ;
+                                                                  <http://www.w3.org/2003/11/swrl#propertyPredicate> pizza:hasTopping ;
+                                                                  <http://www.w3.org/2003/11/swrl#argument1> <urn:swrl#x> ;
+                                                                  <http://www.w3.org/2003/11/swrl#argument2> <urn:swrl#y1>
+                                                                ] ;
+                                                      rdf:rest [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                                                 rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#IndividualPropertyAtom> ;
+                                                                             <http://www.w3.org/2003/11/swrl#propertyPredicate> pizza:hasTopping ;
+                                                                             <http://www.w3.org/2003/11/swrl#argument1> <urn:swrl#x> ;
+                                                                             <http://www.w3.org/2003/11/swrl#argument2> <urn:swrl#y2>
+                                                                           ] ;
+                                                                 rdf:rest [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                                                            rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#IndividualPropertyAtom> ;
+                                                                                        <http://www.w3.org/2003/11/swrl#propertyPredicate> pizza:hasTopping ;
+                                                                                        <http://www.w3.org/2003/11/swrl#argument1> <urn:swrl#x> ;
+                                                                                        <http://www.w3.org/2003/11/swrl#argument2> <urn:swrl#y3>
+                                                                                      ] ;
+                                                                            rdf:rest [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                                                                       rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#DifferentIndividualsAtom> ;
+                                                                                                   <http://www.w3.org/2003/11/swrl#argument1> <urn:swrl#y1> ;
+                                                                                                   <http://www.w3.org/2003/11/swrl#argument2> <urn:swrl#y2>
+                                                                                                 ] ;
+                                                                                       rdf:rest [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                                                                                  rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#DifferentIndividualsAtom> ;
+                                                                                                              <http://www.w3.org/2003/11/swrl#argument1> <urn:swrl#y1> ;
+                                                                                                              <http://www.w3.org/2003/11/swrl#argument2> <urn:swrl#y3>
+                                                                                                            ] ;
+                                                                                                  rdf:rest [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                                                                                             rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#DifferentIndividualsAtom> ;
+                                                                                                                         <http://www.w3.org/2003/11/swrl#argument1> <urn:swrl#y2> ;
+                                                                                                                         <http://www.w3.org/2003/11/swrl#argument2> <urn:swrl#y3>
+                                                                                                                       ] ;
+                                                                                                             rdf:rest rdf:nil
+                                                                                                           ]
+                                                                                                ]
+                                                                                     ]
+                                                                          ]
+                                                               ]
+                                                    ]
+                                         ] ;
+   <http://www.w3.org/2003/11/swrl#head> [ rdf:type <http://www.w3.org/2003/11/swrl#AtomList> ;
+                                           rdf:first [ rdf:type <http://www.w3.org/2003/11/swrl#ClassAtom> ;
+                                                       <http://www.w3.org/2003/11/swrl#classPredicate> pizza:InterestingPizza ;
+                                                       <http://www.w3.org/2003/11/swrl#argument1> <urn:swrl#x>
+                                                     ] ;
+                                           rdf:rest rdf:nil
+                                         ]
+ ] .
+
+###  Generated by the OWL API (version 4.2.8.20170104-2310) https://github.com/owlcs/owlapi
