@@ -1,6 +1,7 @@
 #FROM openkbs/jdk11-mvn-py3
-#FROM openkbs/java11-non-root
-FROM openjdk:11
+#FROM openkbs/jdk-mvn-py3
+FROM openkbs/java11-nonroot-docker
+#FROM openjdk:11
 
 MAINTAINER DrSnowbird "DrSnowbird@openkbs.org"
 
@@ -130,9 +131,8 @@ RUN mv ${BIGDATA_PROPERTY} ${BIGDATA_PROPERTY}.ORIG && \
 #### ---- Install Libs or Plugins ----
 #### ---------------------------------
 # ... add Product plugin if any 
-RUN \
-    apt-get update -y && \
-    apt-get install -y sudo ack-grep && \
+RUN sudo apt-get update -y && sudo apt-get upgrade -y && \
+    sudo apt-get install -y sudo ack && \
     rm -rf /var/lib/apt/lists/*
 
 #### -----------------------------

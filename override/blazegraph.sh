@@ -22,7 +22,7 @@ fi
 
 export JETTY_CLASSPATH=`find ${LIB_DIR} -name 'blazegraph-*.jar' -print0 | tr '\0' ':'`:`find ${LIB_DIR} -name '*.jar' -print0 | tr '\0' ':'`
 
-#### Modified by DrSnowbird@openkbs.org
+#### Modified 
 export DATA_DIR=${DATA_DIR:-${BLZG_HOME}/data}
 
 if [ ! -d "${DATA_DIR}" ]; then
@@ -80,12 +80,12 @@ case "$1" in
       # value to avoid breaking it, but it is very likely to be
       # incorrect.
       if [ "${INSTALL_TYPE}" == "BREW" ]; then
-          #### Modified by DrSnowbird@openkbs.org
+          #### Modified 
           #### To avoid run-away process when using Docker
           #$cmd >> $BLZG_LOG 2>&1 &
           $cmd >> $BLZG_LOG 2>&1 &
       else
-          #### Modified by DrSnowbird@openkbs.org
+          #### Modified 
           #### To avoid run-away process when using Docker
           #$cmd >> $BLZG_LOG 2>&1 &
           $cmd >> $BLZG_LOG 2>&1

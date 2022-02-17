@@ -98,7 +98,7 @@ find_openjdks()
     fi
 }
 
-#### ---- commented out by DrSnowbird/OpenKBS
+#### ---- commented out by #### Modified 
 #OPENJDKS=""
 #find_openjdks
 ## The first existing directory is used for JAVA_HOME (if JAVA_HOME is not

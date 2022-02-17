@@ -1,7 +1,7 @@
 version: '3.3' 
 services:
-  blazegraph:
-    image: openkbs/blazegraph-docker
+  blazegraph-docker:
+    image: blazegraph-docker
     container_name: blazegraph-docker
     build:
       context: .
@@ -11,7 +11,7 @@ services:
       - GROUP_ID=${GROUP_ID:-1001}
       - JVM_MEM=2g
     env_file:
-      - ./.env
+      - .env
     ports:
       - 9999:9999
     volumes:

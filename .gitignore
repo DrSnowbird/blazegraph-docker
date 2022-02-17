@@ -25,3 +25,7 @@ hs_err_pid*
 # tempoary things
 blazegraph-tgz-*
 .fuse*
+
+# tmp files
+**SAVE
+**OLD
