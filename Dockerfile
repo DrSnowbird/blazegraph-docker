@@ -1,6 +1,6 @@
 #FROM openkbs/jdk11-mvn-py3
 #FROM openkbs/jdk-mvn-py3
-FROM openkbs/java11-nonroot-docker
+FROM openkbs/java-nonroot-docker
 #FROM openjdk:11
 
 MAINTAINER DrSnowbird "DrSnowbird@openkbs.org"
