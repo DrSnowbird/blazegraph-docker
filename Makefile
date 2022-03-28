@@ -55,6 +55,8 @@ RESTART_OPTION := always
 
 SHA := $(shell git describe --match=NeVeRmAtCh --always --abbrev=40 --dirty=*)
 
+TIME_START := $(shell date +%s)
+
 .PHONY: clean rmi build push pull up down run stop exec
 
 clean:
@@ -71,10 +73,15 @@ build-time:
 	--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
 	-t $(DOCKER_IMAGE):$(VERSION) .
 
+build-rm:
+	docker build --force-rm --no-cache \
+		-t $(DOCKER_IMAGE):$(VERSION) .
 
 build:
 	docker build \
-	-t $(DOCKER_IMAGE):$(VERSION) .
+	    -t $(DOCKER_IMAGE):$(VERSION) .
+	docker images | grep $(DOCKER_IMAGE)
+	@echo ">>> Total Dockder images Build using time in seconds: $$(($$(date +%s)-$(TIME_START))) seconds"
 
 push:
 	docker commit -m "$comment" ${containerID} ${imageTag}:$(VERSION)
@@ -96,20 +103,36 @@ pull:
 		docker pull $(REGISTRY_IMAGE):$(VERSION) ; \
 	fi
 
+## -- deployment mode (daemon service): -- ##
 up:
+	bin/auto-config-all.sh
 	docker-compose up -d
+	docker ps | grep $(DOCKER_IMAGE)
+	@echo ">>> Total Dockder images Build using time in seconds: $$(($$(date +%s)-$(TIME_START))) seconds"
 
 down:
 	docker-compose down
+	docker ps | grep $(DOCKER_IMAGE)
+	@echo ">>> Total Dockder images Build using time in seconds: $$(($$(date +%s)-$(TIME_START))) seconds"
 
+down-rm:
+	docker-compose down -v --rmi all --remove-orphans
+	docker ps | grep $(DOCKER_IMAGE)
+	@echo ">>> Total Dockder images Build using time in seconds: $$(($$(date +%s)-$(TIME_START))) seconds"
+
+## -- dev/debug -- ##
 run:
-	docker run --name=$(DOCKER_NAME) --restart=$(RESTART_OPTION) $(VOLUME_MAP) $(DOCKER_IMAGE):$(VERSION)
+	bin/auto-config-all.sh
+	./run.sh
+	docker ps | grep $(DOCKER_IMAGE)
+	
+#docker run --name=$(DOCKER_NAME) --restart=$(RESTART_OPTION) $(VOLUME_MAP) $(DOCKER_IMAGE):$(VERSION)
 
 stop:
 	docker stop --name=$(DOCKER_NAME)
 
 status:
-	docker ps
+	docker ps | grep $(DOCKER_NAME)
 
 rmi:
 	docker rmi $$(docker images -f dangling=true -q)
