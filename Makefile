@@ -2,7 +2,7 @@
 # login first (Registry: e.g., hub.docker.io, registry.localhost:5000, etc.)
 # a.)  docker login
 # or
-# b.) sudo docker login -p FpXM6Qy9vVL5kPeoefzxwA-oaYb-Wpej2iXTwV7UHYs -e unused -u unused docker-registry-default.openkbs.org
+# b.) docker login -p FpXM6Qy9vVL5kPeoefzxwA-oaYb-Wpej2iXTwV7UHYs -e unused -u unused docker-registry-default.openkbs.org
 # e.g. (using Openshift)
 #    oc process -f ./files/deployments/template.yml -v API_NAME=$(REGISTRY_IMAGE) > template.active
 #
@@ -22,8 +22,9 @@ BASE_IMAGE := $(BASE_IMAGE)
 #  cat -e -t -v Makefile
 
 # The name of the container (default is current directory name)
-#DOCKER_NAME := $(shell echo $${PWD\#\#*/})
-DOCKER_NAME := $(shell echo $${PWD\#\#*/}|tr '[:upper:]' '[:lower:]'|tr "/: " "_" )
+mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
+DOCKER_NAME := $(shell echo $(current_dir)|tr '[:upper:]' '[:lower:]'|tr "/: " "_" )
 
 ORGANIZATION=$(shell echo $${ORGANIZATION:-openkbs})
 APP_VERSION=$(shell echo $${APP_VERSION:-latest})
@@ -59,8 +60,11 @@ TIME_START := $(shell date +%s)
 
 .PHONY: clean rmi build push pull up down run stop exec
 
-clean:
-	$(DOCKER_NAME) $(DOCKER_IMAGE):$(VERSION) 
+debug:
+	@echo "makefile_path="$(mkfile_path)
+	@echo "current_dir="$(current_dir)
+	@echo "DOCKER_NNAME="$(DOCKER_NAME) 
+	@echo "DOCKER_IMAGE:VERSION="$(DOCKER_IMAGE):$(VERSION) 
 
 default: build
 
@@ -105,9 +109,7 @@ pull:
 
 ## -- deployment mode (daemon service): -- ##
 up:
-	bin/auto-config-all.sh
 	docker-compose up -d
-	docker ps | grep $(DOCKER_IMAGE)
 	@echo ">>> Total Dockder images Build using time in seconds: $$(($$(date +%s)-$(TIME_START))) seconds"
 
 down:
@@ -122,11 +124,8 @@ down-rm:
 
 ## -- dev/debug -- ##
 run:
-	bin/auto-config-all.sh
 	./run.sh
-	docker ps | grep $(DOCKER_IMAGE)
-	
-#docker run --name=$(DOCKER_NAME) --restart=$(RESTART_OPTION) $(VOLUME_MAP) $(DOCKER_IMAGE):$(VERSION)
+	#docker run --name=$(DOCKER_NAME) --restart=$(RESTART_OPTION) $(VOLUME_MAP) $(DOCKER_IMAGE):$(VERSION)
 
 stop:
 	docker stop --name=$(DOCKER_NAME)
