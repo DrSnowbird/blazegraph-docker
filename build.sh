@@ -82,7 +82,8 @@ fi
 ###################################################
 #### ---- Change this only if want to use your own
 ###################################################
-ORGANIZATION=openkbs
+#ORGANIZATION=openkbs
+ORGANIZATION=sunflower
 
 ###################################################
 #### ---- Detect Docker Run Env files ----
@@ -121,6 +122,7 @@ detectDockerBuildEnvFile
 #### ---- Container package information ----
 ###################################################
 DOCKER_IMAGE_REPO=`echo $(basename $PWD)|tr '[:upper:]' '[:lower:]'|tr "/: " "_" `
+DOCKER_IMAGE_REPO=blazegraph-215astar-docker  # GS mod
 imageTag=${imageTag:-"${ORGANIZATION}/${DOCKER_IMAGE_REPO}"}
 
 ###################################################
@@ -136,7 +138,6 @@ BUILD_ARGS="--build-arg BUILD_DATE=${BUILD_DATE} --build-arg VCS_REF=${VCS_REF}"
 function generateBuildArgs() {
     if [ "${DOCKER_ENV_FILE}" != "" ] && [ -s "${DOCKER_ENV_FILE}" ]; then
         for r in `cat ${DOCKER_ENV_FILE} | grep -v '^#'`; do
-            echo "entry=> $r"
             key=`echo $r | tr -d ' ' | cut -d'=' -f1`
             value=`echo $r | tr -d ' ' | cut -d'=' -f2`
             BUILD_ARGS="${BUILD_ARGS} --build-arg $key=$value"

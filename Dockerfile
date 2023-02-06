@@ -1,7 +1,7 @@
 #FROM openkbs/jdk11-mvn-py3
 #FROM openkbs/jdk-mvn-py3
-FROM openkbs/java-nonroot-docker
-#FROM openjdk:11
+#FROM openkbs/java-nonroot-docker
+FROM openjdk:11
 
 MAINTAINER DrSnowbird "DrSnowbird@openkbs.org"
 
@@ -10,7 +10,9 @@ ARG VCS_URL=${VCS_URL}
 
 LABEL org.label-schema.vcs-ref=$VCS_REF \
       org.label-schema.vcs-url="https://github.com/${VCS_URL}"
-          
+LABEL Author="GSerdyuk"
+LABEL Author.email="gennady_serdyuk@epam.com"
+LABEL Comment="derivative work from DrSnowbird's"    
 ## ---------------------------------
 ## ---- Product Specifications: ----
 ## ---------------------------------
@@ -41,7 +43,7 @@ ENV PRODUCT_FULL_PATH_EXE=${PRODUCT_FULL_PATH_EXE:-${PRODUCT_HOME}/bin/${PRODUCT
 #ARG PRODUCT_RELEASE=${PRODUCT_RELEASE:-}
 
 ## -- 3.) Product Version: -- ##
-ARG PRODUCT_VERSION=${PRODUCT_VERSION:-2.1.5}
+ARG PRODUCT_VERSION=${PRODUCT_VERSION:-2.1.5-ASTAR}
 ENV PRODUCT_VERSION=${PRODUCT_VERSION}
 
 ## -- 4.) Product Download Mirror site: -- ##
@@ -113,13 +115,22 @@ ARG PRODUCT_DOWNLOAD_ROUTE=${PRODUCT_DOWNLOAD_ROUTE:-${PRODUCT_PROVIDER}/${PRODU
 ## -- Product Download full URL: -- ##
 ARG PRODUCT_DOWNLOAD_URL=${PRODUCT_DOWNLOAD_URL:-${PRODUCT_MIRROR_SITE_URL}/${PRODUCT_DOWNLOAD_ROUTE}}
 
-user root
+user root   
 WORKDIR ${PRODUCT_INSTALL_ROOT_DIR}
 
-RUN wget -c -q --no-check-certificate ${PRODUCT_DOWNLOAD_URL}/${PRODUCT_TAR} && \
-    tar xvf ${PRODUCT_TAR} && \
-    mv ${PRODUCT_NAME}-tgz-${PRODUCT_VERSION} ${PRODUCT_NAME} && \
-    rm -f ${PRODUCT_TAR} 
+# ${PRODUCT_NAME} ->        blazegraph
+# ${PRODUCT_VERSION} ->     2.1.5-ASTAR
+#
+#${PRODUCT_NAME}-tgz-${PRODUCT_VERSION} = blazegraph-tgz-2.1.5-ASTAR
+#
+#{PRODUCT_TAR} ->           blazegraph-tgz-2.1.5-ASTAR.tar.gz 
+# but now -                                 
+
+ADD ./tgz/blazegraph-tgz-2.1.5-ASTAR-bundle.tar.gz ${pwd}
+#    tar xvf blazegraph-tgz-2.1.5-ASTAR-bundle.tar.gz
+
+RUN mv ${PRODUCT_NAME}-tgz-${PRODUCT_VERSION} ${PRODUCT_NAME} 
+#    rm -f blazegraph-tgz-2.1.5-ASTAR-bundle.tar.gz 
 
 RUN mv ${BIGDATA_PROPERTY} ${BIGDATA_PROPERTY}.ORIG && \
     ## (not exist yet) mv war/WEB-INF/GraphStore.properties /war/WEB-INF/GraphStore.properties && \
@@ -131,8 +142,10 @@ RUN mv ${BIGDATA_PROPERTY} ${BIGDATA_PROPERTY}.ORIG && \
 #### ---- Install Libs or Plugins ----
 #### ---------------------------------
 # ... add Product plugin if any 
-RUN sudo apt-get update -y && sudo apt-get upgrade -y && \
-    sudo apt-get install -y sudo ack && \
+ARG DEBIAN_FRONTENED=noninteractive
+RUN apt-get update -y && apt-get upgrade -y && \
+    apt-get install -y apt-utils && \
+    apt-get install -y ack && \
     rm -rf /var/lib/apt/lists/*
 
 #### -----------------------------
